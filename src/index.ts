@@ -1,5 +1,5 @@
 import { Client, GatewayIntentBits, REST, Routes } from 'discord.js';
-import { BotToken, BotClientID } from './secret/token';
+import { BotToken, BotClientID } from './secret/tokens';
 
 const commands = [
     {
