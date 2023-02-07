@@ -6,7 +6,9 @@
         "rootDir": "./src",
         "outDir": "./build",
         "strictNullChecks": true,
-        "strictFunctionTypes": true
+        "strictFunctionTypes": true,
+        "resolveJsonModule": true,
+        "esModuleInterop": true,
     },
     "exclude": [
         "node_modules",

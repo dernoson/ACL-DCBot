@@ -1,11 +1,15 @@
-import { Client, GatewayIntentBits, REST, Routes } from 'discord.js';
+import { Client, REST, Routes } from 'discord.js';
 import { BotToken, BotClientID } from './secret/tokens';
 import { CommandExport } from './types';
-
-import Ping from './commands/Ping';
 import { getCommandOptions } from './utils';
+import { IntentOptions } from './config/optionSettings';
+import { botEnv } from './config/botSettings';
 
-const commands: CommandExport[] = [Ping];
+import SetEnv from './commands/SetEnv';
+import Test from './commands/Test';
+import Match from './commands/Match';
+
+const commands: CommandExport[] = [Test, SetEnv, Match];
 const commandsDef = commands.map((o) => o.defs);
 const commandsFunc: { [key: string]: CommandExport['func'] } = commands.reduce((prev, curr) => {
     const name = curr.defs.name;
@@ -25,10 +29,11 @@ const rest = new REST().setToken(BotToken);
     }
 })();
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({ intents: IntentOptions });
 
 client.on('ready', (client) => {
     console.log(`Logged in as ${client.user.tag}!`);
+    botEnv.onBotReady(client);
 });
 
 client.on('interactionCreate', async (interaction) => {

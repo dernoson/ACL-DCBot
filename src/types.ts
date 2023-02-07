@@ -6,6 +6,7 @@ import type {
     CommandInteractionOption,
     SlashCommandBuilder,
     Channel,
+    ChannelType,
 } from 'discord.js';
 
 export type CommandFunction<O extends {} = any> = (interaction: ChatInputCommandInteraction<CacheType>, options: O) => Awaitable<void>;

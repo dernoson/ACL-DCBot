@@ -1,28 +1,29 @@
 import { ApplicationCommandOptionType, CacheType, ChatInputCommandInteraction, Client } from 'discord.js';
 import { OptionType } from './types';
 
-export const getCommandOptions = (
-    options: ChatInputCommandInteraction<CacheType>['options'],
-    client: Client<true>
-): Partial<{ [key: string]: OptionType[keyof OptionType] }> => {
-    return options.data.reduce((prev, curr) => {
-        switch (curr.type) {
+export const getCommandOptions = (options: ChatInputCommandInteraction<CacheType>['options'], client: Client<true>) => {
+    const channelCache = client.channels.cache;
+    return options.data.reduce<Partial<{ [key: string]: OptionType[keyof OptionType] | null }>>((prev, { type, name, user, role, value }) => {
+        switch (type) {
             case ApplicationCommandOptionType.Subcommand:
-                return { ...prev, [curr.name]: options.getSubcommand() };
+                return { ...prev, [name]: options.getSubcommand() };
             case ApplicationCommandOptionType.SubcommandGroup:
-                return { ...prev, [curr.name]: options.getSubcommandGroup() };
+                return { ...prev, [name]: options.getSubcommandGroup() };
             case ApplicationCommandOptionType.User:
-                return { ...prev, [curr.name]: curr.user };
-            case ApplicationCommandOptionType.Channel:
-                return { ...prev, [curr.name]: client.channels.cache.get(options.getChannel(curr.name, true).id) };
+                return { ...prev, [name]: user };
+            case ApplicationCommandOptionType.Channel: {
+                const channel = options.getChannel(name);
+                if (!channel) return prev;
+                return { ...prev, [name]: channelCache.get(channel.id) };
+            }
             case ApplicationCommandOptionType.Role:
-                return { ...prev, [curr.name]: curr.role };
+                return { ...prev, [name]: role };
             case ApplicationCommandOptionType.Mentionable:
-                return { ...prev, [curr.name]: options.getMentionable(curr.name) };
+                return { ...prev, [name]: options.getMentionable(name) };
             case ApplicationCommandOptionType.Attachment:
-                return { ...prev, [curr.name]: options.getAttachment(curr.name) };
+                return { ...prev, [name]: options.getAttachment(name) };
             default:
-                return { ...prev, [curr.name]: curr.value };
+                return { ...prev, [name]: value };
         }
     }, {});
 };
