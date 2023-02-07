@@ -1,6 +1,6 @@
 import { roleMention, channelMention, SlashCommandBuilder } from 'discord.js';
 import { normalMentionOptions } from '../config/optionSettings';
-import { CommandFunction, OptionType } from '../types';
+import type { CommandFunction, OptionType } from '../types';
 
 type Options_Test = {
     integer?: OptionType['Integer'];

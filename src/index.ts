@@ -1,6 +1,6 @@
 import { Client, REST, Routes } from 'discord.js';
 import { BotToken, BotClientID } from './secret/tokens';
-import { CommandExport } from './types';
+import type { CommandExport } from './types';
 import { getCommandOptions } from './utils';
 import { IntentOptions } from './config/optionSettings';
 import { botEnv } from './config/botSettings';

@@ -1,5 +1,5 @@
 import { ApplicationCommandOptionType, CacheType, ChatInputCommandInteraction, Client } from 'discord.js';
-import { OptionType } from './types';
+import type { OptionType } from './types';
 
 export const getCommandOptions = (options: ChatInputCommandInteraction<CacheType>['options'], client: Client<true>) => {
     const channelCache = client.channels.cache;

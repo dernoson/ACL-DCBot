@@ -1,6 +1,6 @@
 import { channelMention, ChannelType, PermissionFlagsBits, Role, roleMention, SlashCommandBuilder, TextChannel } from 'discord.js';
 import { botEnv, dumpSetting } from '../config/botSettings';
-import { CommandFunction, OptionType } from '../types';
+import type { CommandFunction, OptionType } from '../types';
 
 type Options_SetEnv = {
     admin_role?: OptionType['Role'];
@@ -19,7 +19,7 @@ const SetEnv: CommandFunction<Options_SetEnv> = async (interaction, { admin_role
 
     await interaction.reply(`\
 [設定機器人環境] \n\
-主辦方權限: ${botEnv.admin ? roleMention(botEnv.admin.id) : '伺服器管理者'}\n\
+主辦方權限: ${botEnv.admin ? roleMention(botEnv.admin.id) : '伺服器管理員'}\n\
 機器人log頻道: ${botEnv.logChannel ? channelMention(botEnv.logChannel.id) : '無'}\n\
     `);
 };
@@ -28,7 +28,7 @@ export default {
     func: SetEnv,
     defs: new SlashCommandBuilder()
         .setName('set_env')
-        .setDescription('設定主辦權限身分組，以及設定機器人log頻道')
+        .setDescription('[ 管理員指令 ] 設定主辦權限身分組，以及設定機器人log頻道')
         .addRoleOption((option) => option.setName('admin_role').setDescription('設定主辦權限身分組，當未設定時，主辦權限設為管理員權限'))
         .addChannelOption((option) =>
             option
