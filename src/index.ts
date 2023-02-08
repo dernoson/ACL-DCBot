@@ -7,9 +7,9 @@ import { botEnv } from './config/botSettings';
 
 import SetEnv from './commands/SetEnv';
 import Test from './commands/Test';
-import Match from './commands/Match';
+import MatchSet from './commands/MatchSet';
 
-const commands: CommandExport[] = [Test, SetEnv, Match];
+const commands: CommandExport[] = [Test, SetEnv, MatchSet];
 const commandsDef = commands.map((o) => o.defs);
 const commandsFunc: { [key: string]: CommandExport['func'] } = commands.reduce((prev, curr) => {
     const name = curr.defs.name;

@@ -1,4 +1,5 @@
 import { ApplicationCommandOptionType, CacheType, ChatInputCommandInteraction, Client } from 'discord.js';
+import { botEnv } from './config/botSettings';
 import type { OptionType } from './types';
 
 export const getCommandOptions = (options: ChatInputCommandInteraction<CacheType>['options'], client: Client<true>) => {
@@ -26,4 +27,13 @@ export const getCommandOptions = (options: ChatInputCommandInteraction<CacheType
                 return { ...prev, [name]: value };
         }
     }, {});
+};
+
+export const replyCommandError = async (interaction: ChatInputCommandInteraction<CacheType>, commandName: string, content: string) => {
+    await interaction.reply({ content, ephemeral: true });
+    await botEnv.log(`Error：[${commandName} by ${interaction.user.username}]\n${content}`);
+};
+
+export const logCommandResult = async (userName: string, commandName: string, content: string) => {
+    await botEnv.log(`[${commandName} by ${userName}]\n${content}`);
 };
