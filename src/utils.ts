@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, CacheType, ChatInputCommandInteraction, Client } from 'discord.js';
+import { ApplicationCommandOptionType, CacheType, ChatInputCommandInteraction, Client, roleMention } from 'discord.js';
 import { botEnv } from './config/botSettings';
 import type { OptionType } from './types';
 
@@ -37,3 +37,5 @@ export const replyCommandFail = async (interaction: ChatInputCommandInteraction<
 export const logCommandResult = async (userName: string, commandName: string, content: string) => {
     await botEnv.log(`> **[ ${commandName} ] success**\n\`by ${userName} at <${new Date()}>\`\n${content}`);
 };
+
+export const getAdminMention = () => (botEnv.admin ? roleMention(botEnv.admin.id) : '伺服器管理員');
