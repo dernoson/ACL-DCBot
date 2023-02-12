@@ -23,8 +23,8 @@ const MatchStart: CommandFunction<Options_MatchStart> = async (interaction, { ch
             sendMatchStart(lastMatchState, match);
         });
         const content = startedMatchName.length ? `已啟動以下頻道的BP流程：\n${startedMatchName.join('\n')}` : '未啟動任何頻道的BP流程';
-        interaction.reply({ content, ephemeral: true });
-        logCommandResult(interaction.user.username, commandName, content);
+        await interaction.reply({ content, ephemeral: true });
+        await logCommandResult(interaction.user.username, commandName, content);
     } else {
         const targetChannel = channel || interaction.channel;
         if (!(targetChannel instanceof TextChannel)) return await replyCommandFail(interaction, commandName, '指定頻道非純文字頻道');
@@ -34,10 +34,10 @@ const MatchStart: CommandFunction<Options_MatchStart> = async (interaction, { ch
         if (lastMatchState != MatchState.prepare && lastMatchState != MatchState.pause)
             return await replyCommandFail(interaction, commandName, '該頻道BP流程無法啟動');
 
-        sendMatchStart(lastMatchState, match);
+        await sendMatchStart(lastMatchState, match);
         const content = `已啟動 ${match.channel.name} 的BP流程`;
-        interaction.reply({ content, ephemeral: true });
-        logCommandResult(interaction.user.username, commandName, content);
+        await interaction.reply({ content, ephemeral: true });
+        await logCommandResult(interaction.user.username, commandName, content);
     }
 };
 

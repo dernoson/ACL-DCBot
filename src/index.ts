@@ -9,8 +9,9 @@ import SetEnv from './commands/SetEnv';
 import Test from './commands/Test';
 import MatchSet from './commands/MatchSet';
 import MatchStart from './commands/MatchStart';
+import SetConfig from './commands/SetConfig';
 
-const commands: CommandExport[] = [Test, SetEnv, MatchSet, MatchStart];
+const commands: CommandExport[] = [Test, SetEnv, MatchSet, MatchStart, SetConfig];
 const commandsDef = commands.map((o) => o.defs);
 const commandsFunc: { [key: string]: CommandExport['func'] } = commands.reduce((prev, curr) => {
     const name = curr.defs.name;
