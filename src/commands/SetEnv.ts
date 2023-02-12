@@ -1,7 +1,9 @@
 import { channelMention, ChannelType, GuildMember, PermissionFlagsBits, Role, roleMention, SlashCommandBuilder, TextChannel } from 'discord.js';
 import { botEnv, dumpSetting } from '../config/botSettings';
 import type { CommandFunction, OptionType } from '../types';
-import { replyCommandError } from '../utils';
+import { replyCommandFail } from '../utils';
+
+const commandName = 'set_env';
 
 type Options_SetEnv = {
     admin_role?: OptionType['Role'];
@@ -10,7 +12,7 @@ type Options_SetEnv = {
 
 const SetEnv: CommandFunction<Options_SetEnv> = async (interaction, { admin_role, log_channel }) => {
     if (!(interaction.member instanceof GuildMember) || !interaction.member.permissions.has(PermissionFlagsBits.Administrator))
-        return await replyCommandError(interaction, 'set_env', '並非管理員，無法使用該指令');
+        return await replyCommandFail(interaction, commandName, '並非管理員，無法使用該指令');
 
     const admin = admin_role instanceof Role ? admin_role : undefined;
     const logChannel = log_channel instanceof TextChannel ? log_channel : undefined;
@@ -35,7 +37,7 @@ const SetEnv: CommandFunction<Options_SetEnv> = async (interaction, { admin_role
 export default {
     func: SetEnv,
     defs: new SlashCommandBuilder()
-        .setName('set_env')
+        .setName(commandName)
         .setDescription('[ 管理員指令 ] 設定主辦權限身分組，以及設定機器人log頻道')
         .addRoleOption((option) => option.setName('admin_role').setDescription('設定主辦權限身分組，當未設定時，主辦權限設為管理員權限'))
         .addChannelOption((option) =>

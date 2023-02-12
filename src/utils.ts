@@ -29,11 +29,11 @@ export const getCommandOptions = (options: ChatInputCommandInteraction<CacheType
     }, {});
 };
 
-export const replyCommandError = async (interaction: ChatInputCommandInteraction<CacheType>, commandName: string, content: string) => {
+export const replyCommandFail = async (interaction: ChatInputCommandInteraction<CacheType>, commandName: string, content: string) => {
     await interaction.reply({ content, ephemeral: true });
-    await botEnv.log(`Error：[${commandName} by ${interaction.user.username}]\n${content}`);
+    await botEnv.log(`> **[ ${commandName} ] fail**\n\`by ${interaction.user.username} at <${new Date()}>\`\n${content}`);
 };
 
 export const logCommandResult = async (userName: string, commandName: string, content: string) => {
-    await botEnv.log(`[${commandName} by ${userName}]\n${content}`);
+    await botEnv.log(`> **[ ${commandName} ] success**\n\`by ${userName} at <${new Date()}>\`\n${content}`);
 };

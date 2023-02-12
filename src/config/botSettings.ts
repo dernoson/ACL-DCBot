@@ -45,6 +45,10 @@ class BotEnv {
         if (value instanceof Role || value instanceof TextChannel || value instanceof User) settings[key] = value.id;
         else settings[key] = value;
     }
+
+    get(key: string) {
+        return botSettings[key];
+    }
 }
 
 export const dumpSetting = () => {
