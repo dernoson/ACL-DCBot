@@ -4,6 +4,9 @@ import { normalMentionOptions } from '../config/optionSettings';
 import { getAdminMention } from '../utils';
 import { BP, Flow, Match, MatchState } from './types';
 
+export const setMatchStageNext = (match: Match, matchFlow: Flow[]) =>
+    getMatchStageDescription(match, matchFlow) + setStageToDo(match, matchFlow);
+
 export const getMatchStageDescription = (match: Match, matchFlow: Flow[]) => {
     const [teamA, teamB] = match.teams;
     const banLimit = calcMatchFlow(matchFlow, 'ban');
@@ -19,7 +22,7 @@ export const getMatchStageDescription = (match: Match, matchFlow: Flow[]) => {
         getOperatorListDescription(teamB.teamRole.name, teamB.pick, pickLimit);
     pickDesc && (pickDesc = '《當前Pick幹員》\n' + pickDesc);
 
-    return banDesc + pickDesc + setStageToDo(match, matchFlow);
+    return banDesc + pickDesc;
 };
 
 const setStageToDo = (match: Match, matchFlow: Flow[]) => {

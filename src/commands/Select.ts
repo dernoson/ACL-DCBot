@@ -1,7 +1,7 @@
 import { CacheType, ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from 'discord.js';
 import { normalMentionOptions } from '../config/optionSettings';
 import { BPOption, Flow, Match, matchMap, MatchState, normalMatchFlow } from '../match';
-import { getDuplicate, getMatchStageDescription, getNowTeam, toUnique } from '../match/functions';
+import { getDuplicate, getNowTeam, setMatchStageNext, toUnique } from '../match/functions';
 import { CommandFunction, OptionType } from '../types';
 import { replyCommandFail } from '../utils';
 
@@ -48,7 +48,7 @@ const banPickRole = async (
     match.flowIndex++;
     match.isLastTeam = !match.isLastTeam;
     await interaction.reply({
-        content: `${nowTeam.teamRole.name} 選擇了 \`${operatorList.join(' ')}\`\n` + getMatchStageDescription(match, normalMatchFlow),
+        content: `${nowTeam.teamRole.name} 選擇了 \`${operatorList.join(' ')}\`\n` + setMatchStageNext(match, normalMatchFlow),
         allowedMentions: normalMentionOptions,
     });
 };

@@ -12,10 +12,11 @@ import MatchStart from './commands/MatchStart';
 import MatchClear from './commands/MatchClear';
 import MatchConfirm from './commands/MatchConfirm';
 import MatchLaststep from './commands/MatchLaststep';
+import LogMatch from './commands/LogMatch';
 import SetConfig from './commands/SetConfig';
 import Select from './commands/Select';
 
-const commands: CommandExport[] = [Test, Select, MatchSet, MatchStart, MatchClear, MatchConfirm, MatchLaststep, SetEnv, SetConfig];
+const commands: CommandExport[] = [Test, Select, MatchSet, MatchStart, MatchClear, MatchConfirm, MatchLaststep, LogMatch, SetEnv, SetConfig];
 const commandsDef = commands.map((o) => o.defs);
 const commandsFunc: { [key: string]: CommandExport['func'] } = commands.reduce((prev, curr) => {
     const name = curr.defs.name;

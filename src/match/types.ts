@@ -10,11 +10,11 @@ export type Match = {
 };
 
 export const enum MatchState {
-    prepare,
-    running,
-    pause,
-    complete,
-    fixed,
+    prepare = '準備中',
+    running = '進行中',
+    pause = '暫停',
+    complete = '待確認',
+    fixed = '已確認',
 }
 
 export type BP = {

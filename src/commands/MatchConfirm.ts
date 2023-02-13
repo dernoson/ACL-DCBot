@@ -47,7 +47,8 @@ const MatchConfirm: CommandFunction<Options_MatchStart> = async (interaction) =>
             }
         )
         .setFooter({ text: `於 ${match.channel.name}` })
-        .setTimestamp();
+        .setTimestamp()
+        .setColor('DarkAqua');
 
     await botEnv.logChannel.send({ embeds: [embed] });
 };

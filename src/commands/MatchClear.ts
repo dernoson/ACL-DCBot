@@ -45,7 +45,7 @@ export default {
         .addChannelOption((option) =>
             option
                 .setName('channel')
-                .setDescription('選擇已被指定的BP使用頻道，未填選時，視為選擇使用該指令的當前頻道')
+                .setDescription('選擇欲清除的BP使用頻道，未填選時，視為選擇使用該指令的當前頻道')
                 .addChannelTypes(ChannelType.GuildText)
         )
         .addBooleanOption((option) => option.setName('all').setDescription('選填該選項為True時，無視channel指定，清空所有BP頻道指定')),

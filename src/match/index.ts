@@ -30,4 +30,13 @@ export const normalMatchFlow: Flow<BPOption>[] = [
 export const matchMap = new Map<string, Match>();
 
 export { Match, MatchState, BP, BPOption, Flow } from './types';
-export { genMatch, genBP, getDuplicate, calcMatchFlow, getOperatorListDescription, getMatchStageDescription } from './functions';
+export {
+    genMatch,
+    genBP,
+    getDuplicate,
+    calcMatchFlow,
+    getOperatorListDescription,
+    getMatchStageDescription,
+    setMatchStageNext,
+    setBPTimeLimit,
+} from './functions';

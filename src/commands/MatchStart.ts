@@ -2,7 +2,7 @@ import { ChannelType, roleMention, SlashCommandBuilder, TextChannel } from 'disc
 import { botEnv } from '../config/botSettings';
 import { CommandFunction, OptionType } from '../types';
 import { replyCommandFail, logCommandResult } from '../utils';
-import { matchMap, MatchState, getMatchStageDescription, normalMatchFlow, Match } from '../match';
+import { matchMap, MatchState, setMatchStageNext, normalMatchFlow, Match } from '../match';
 import { normalMentionOptions } from '../config/optionSettings';
 
 const commandName = 'match_start';
@@ -46,9 +46,8 @@ async function sendMatchStart(lastMatchState: MatchState, match: Match) {
     const [teamA, teamB] = match.teams;
     const content =
         lastMatchState == MatchState.prepare
-            ? `===  ${roleMention(teamA.teamRole.id)} vs ${roleMention(teamB.teamRole.id)} ===\n` +
-              getMatchStageDescription(match, normalMatchFlow)
-            : getMatchStageDescription(match, normalMatchFlow);
+            ? `===  ${roleMention(teamA.teamRole.id)} vs ${roleMention(teamB.teamRole.id)} ===\n` + setMatchStageNext(match, normalMatchFlow)
+            : setMatchStageNext(match, normalMatchFlow);
 
     await match.channel.send({ content, allowedMentions: normalMentionOptions });
 }
@@ -61,7 +60,7 @@ export default {
         .addChannelOption((option) =>
             option
                 .setName('channel')
-                .setDescription('選擇已被指定的BP使用頻道，未填選時，視為選擇使用該指令的當前頻道')
+                .setDescription('選擇欲啟動的BP使用頻道，未填選時，視為選擇使用該指令的當前頻道')
                 .addChannelTypes(ChannelType.GuildText)
         )
         .addBooleanOption((option) =>
