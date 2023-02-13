@@ -19,7 +19,7 @@ const MatchConfirm: CommandFunction<Options_MatchStart> = async (interaction) =>
 
     match.state = MatchState.fixed;
     const content = `已確認 ${match.channel.name} 的BP流程`;
-    await interaction.reply({ content, ephemeral: true });
+    await interaction.reply(content);
     await logCommandResult(interaction.user.username, commandName, content);
 
     if (!botEnv.logChannel) return;

@@ -15,7 +15,10 @@ const MatchClear: CommandFunction<Options_MatchStart> = async (interaction, { ch
     if (!botEnv.hasAdminPermission(interaction.member)) return await replyCommandFail(interaction, commandName, '並非主辦方，無法使用該指令');
     if (all) {
         const clearedMatchName: string[] = [];
-        matchMap.forEach((match) => clearedMatchName.push(match.channel.name));
+        matchMap.forEach((match) => {
+            clearedMatchName.push(match.channel.name);
+            match.timeStamp = Date.now();
+        });
         matchMap.clear();
         const content = clearedMatchName.length ? `已清除以下頻道的BP流程：\n${clearedMatchName.join('\n')}` : '未清除任何頻道的BP流程';
         await interaction.reply({ content, ephemeral: true });
@@ -27,6 +30,7 @@ const MatchClear: CommandFunction<Options_MatchStart> = async (interaction, { ch
         if (!match) return await replyCommandFail(interaction, commandName, '指定頻道非BP使用頻道');
 
         matchMap.delete(targetChannel.id);
+        match.timeStamp = Date.now();
         const content = `已清除 ${match.channel.name} 的BP流程`;
         await interaction.reply({ content, ephemeral: true });
         await logCommandResult(interaction.user.username, commandName, content);
