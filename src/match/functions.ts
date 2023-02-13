@@ -29,15 +29,17 @@ const setStageToDo = (match: Match, matchFlow: Flow[]) => {
 
     const nextToDo = `請 ${roleMention(getNowTeam(match).teamRole.id)} 選擇要 \`${nowFlow.option}\` 的 \`${nowFlow.amount}\` 位幹員。`;
     if (typeof BPTimeLimit == 'number') {
-        setBPTimeLimit(match, match.flowIndex, BPTimeLimit);
+        setBPTimeLimit(match, BPTimeLimit);
         return nextToDo + `限時 ${BPTimeLimit} 秒。`;
     }
     return nextToDo;
 };
 
-export const setBPTimeLimit = (match: Match, targetFlowIndex: number, timeout: number) => {
+export const setBPTimeLimit = (match: Match, timeout: number) => {
+    const timeStamp = Date.now();
+    match.timeStamp = timeStamp;
     setTimeout(() => {
-        if (match.flowIndex != targetFlowIndex) return;
+        if (match.timeStamp != timeStamp) return;
         match.state = MatchState.pause;
         match.channel.send({
             content: `選擇角色超時，已暫停BP流程，請 ${getAdminMention()} 進行處理中`,
@@ -53,11 +55,12 @@ export const genMatch = (channel: TextChannel, teams: [Role, Role]): Match => ({
     flowIndex: 0,
     isLastTeam: false,
     state: MatchState.prepare,
+    timeStamp: Date.now(),
 });
 
 export const genBP = (teamRole: Role): BP => ({ teamRole, ban: [], pick: [] });
 
-export const checkUnique = () => {};
+export const toUnique = (operators: string[]) => Array.from(new Set(operators));
 
 export const getDuplicate = (operators: string[], { ban, pick }: BP) => {
     return operators.filter((name) => ban.includes(name) || pick.includes(name));

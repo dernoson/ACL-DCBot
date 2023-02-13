@@ -1,21 +1,20 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { botEnv, dumpSetting } from '../config/botSettings';
-import { CommandFunction } from '../types';
+import { CommandFunction, OptionType } from '../types';
 import { logCommandResult, replyCommandFail } from '../utils';
 
 const commandName = 'set_config';
 
 type Options_SetConfig = {
     option: 'BPTimeLimit';
-    value?: string;
+    value?: OptionType['String'];
 };
 
 const SetConfig: CommandFunction<Options_SetConfig> = async (interaction, args) => {
     if (!botEnv.hasAdminPermission(interaction.member)) return await replyCommandFail(interaction, commandName, '並非主辦方，無法使用該指令');
     switch (args.option) {
         case 'BPTimeLimit':
-            await setBPTimeLimit(interaction, args);
-            break;
+            return await setBPTimeLimit(interaction, args);
     }
 };
 

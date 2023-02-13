@@ -6,6 +6,7 @@ export type Match = {
     flowIndex: number;
     isLastTeam: boolean;
     state: MatchState;
+    timeStamp: number;
 };
 
 export const enum MatchState {
