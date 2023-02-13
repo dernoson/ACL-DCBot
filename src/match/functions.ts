@@ -24,7 +24,11 @@ export const getMatchStageDescription = (match: Match, matchFlow: Flow[]) => {
 
 const setStageToDo = (match: Match, matchFlow: Flow[]) => {
     const nowFlow = matchFlow.at(match.flowIndex);
-    if (!nowFlow) return `BP流程已結束，請 ${getAdminMention()} 進行最後確認`;
+    if (!nowFlow) {
+        match.state = MatchState.complete;
+        match.timeStamp = Date.now();
+        return `BP流程已結束，請 ${getAdminMention()} 進行最後確認`;
+    }
     const BPTimeLimit = botEnv.get('BPTimeLimit');
 
     const nextToDo = `請 ${roleMention(getNowTeam(match).teamRole.id)} 選擇要 \`${nowFlow.option}\` 的 \`${nowFlow.amount}\` 位幹員。`;
