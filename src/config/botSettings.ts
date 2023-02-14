@@ -55,4 +55,6 @@ export const dumpSetting = () => {
     fs.writeFile('src/config/botSettings.json', JSON.stringify(botSettings, null, '\t'), (error) => error && console.log(error));
 };
 
+export const getSetting = () => botSettings;
+
 export const botEnv = new BotEnv();

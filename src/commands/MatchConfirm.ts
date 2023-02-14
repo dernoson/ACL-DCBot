@@ -31,19 +31,19 @@ const MatchConfirm: CommandFunction<Options_MatchStart> = async (interaction) =>
         .addFields(
             {
                 name: `${teamA.teamRole.name} Ban除幹員`,
-                value: teamA.ban.join(' '),
+                value: '```' + teamA.ban.join(' ') + '```',
             },
             {
                 name: `${teamB.teamRole.name} Ban除幹員`,
-                value: teamB.ban.join(' '),
+                value: '```' + teamB.ban.join(' ') + '```',
             },
             {
                 name: `${teamA.teamRole.name} Pick幹員`,
-                value: teamA.pick.join(' '),
+                value: '```' + teamA.pick.join(' ') + '```',
             },
             {
                 name: `${teamB.teamRole.name} Pick幹員`,
-                value: teamB.pick.join(' '),
+                value: '```' + teamB.pick.join(' ') + '```',
             }
         )
         .setFooter({ text: `於 ${match.channel.name}` })
