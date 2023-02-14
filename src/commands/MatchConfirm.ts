@@ -2,25 +2,24 @@ import { SlashCommandBuilder, TextChannel, EmbedBuilder } from 'discord.js';
 import { botEnv } from '../config/botSettings';
 import { matchMap, MatchState } from '../match';
 import { CommandFunction } from '../types';
-import { logCommandResult, replyCommandFail } from '../utils';
+import { genCommandReplier } from '../utils';
 
 const commandName = 'match_confirm';
 
 type Options_MatchStart = {};
 
 const MatchConfirm: CommandFunction<Options_MatchStart> = async (interaction) => {
-    if (!botEnv.hasAdminPermission(interaction.member)) return await replyCommandFail(interaction, commandName, '並非主辦方，無法使用該指令');
+    const reply = genCommandReplier(interaction, commandName);
+    if (!botEnv.hasAdminPermission(interaction.member)) return await reply.fail('並非主辦方，無法使用該指令');
 
     const { channel } = interaction;
-    if (!(channel instanceof TextChannel)) return await replyCommandFail(interaction, commandName, '指定頻道非純文字頻道');
+    if (!(channel instanceof TextChannel)) return await reply.fail('指定頻道非純文字頻道');
     const match = matchMap.get(channel.id);
-    if (!match) return await replyCommandFail(interaction, commandName, '頻道非BP使用頻道');
-    if (match.state != MatchState.complete) return await replyCommandFail(interaction, commandName, '頻道BP流程尚未處於可確認狀態');
+    if (!match) return await reply.fail('頻道非BP使用頻道');
+    if (match.state != MatchState.complete) return await reply.fail('頻道BP流程尚未處於可確認狀態');
 
     match.state = MatchState.fixed;
-    const content = `已確認 ${match.channel.name} 的BP流程`;
-    await interaction.reply(content);
-    await logCommandResult(interaction.user.username, commandName, content);
+    await reply.success(`已確認 ${match.channel.name} 的BP流程`, true);
 
     if (!botEnv.logChannel) return;
     const [teamA, teamB] = match.teams;

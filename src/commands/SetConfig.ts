@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { botEnv, dumpSetting } from '../config/botSettings';
 import { CommandFunction, OptionType } from '../types';
-import { logCommandResult, replyCommandFail } from '../utils';
+import { genCommandReplier } from '../utils';
 
 const commandName = 'set_config';
 
@@ -11,7 +11,9 @@ type Options_SetConfig = {
 };
 
 const SetConfig: CommandFunction<Options_SetConfig> = async (interaction, args) => {
-    if (!botEnv.hasAdminPermission(interaction.member)) return await replyCommandFail(interaction, commandName, '並非主辦方，無法使用該指令');
+    const reply = genCommandReplier(interaction, commandName);
+    if (!botEnv.hasAdminPermission(interaction.member)) return await reply.fail('並非主辦方，無法使用該指令');
+
     switch (args.option) {
         case 'BPTimeLimit':
             return await setBPTimeLimit(interaction, args);
@@ -19,23 +21,21 @@ const SetConfig: CommandFunction<Options_SetConfig> = async (interaction, args) 
 };
 
 const setBPTimeLimit: CommandFunction<Options_SetConfig & { option: 'BPTimeLimit' }> = async (interaction, { option, value }) => {
+    const reply = genCommandReplier(interaction, commandName);
+
     if (!value) {
         botEnv.set(option, undefined);
         dumpSetting();
-        const content = '[設定機器人環境] BP選角時限秒數：不限';
-        await interaction.reply({ content, ephemeral: true });
-        await logCommandResult(interaction.user.username, commandName, content);
+        await reply.success('[設定機器人環境] BP選角時限秒數：不限', true, true);
     } else if (isNaN(+value)) {
-        await replyCommandFail(interaction, commandName, 'BPTimeLimit 僅可輸入純數字');
+        await reply.fail('BPTimeLimit 僅可輸入純數字');
     } else if (+value < 1 || +value > 1000) {
-        await replyCommandFail(interaction, commandName, 'BPTimeLimit 僅可接受 1~1000 的數值');
+        await reply.fail('BPTimeLimit 僅可接受 1~1000 的數值');
     } else {
         const second = +value;
         botEnv.set(option, +second);
         dumpSetting();
-        const content = `[設定機器人環境] BP選角時限秒數： ${second} 秒`;
-        await interaction.reply({ content, ephemeral: true });
-        await logCommandResult(interaction.user.username, commandName, content);
+        await reply.success(`[設定機器人環境] BP選角時限秒數： ${second} 秒`, true, true);
     }
 };
 

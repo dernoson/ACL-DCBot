@@ -3,6 +3,7 @@ import { Role, TextChannel } from 'discord.js';
 export type Match = {
     channel: TextChannel;
     teams: [BP, BP];
+    flow: Flow[];
     flowIndex: number;
     isLastTeam: boolean;
     state: MatchState;

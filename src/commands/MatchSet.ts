@@ -1,8 +1,8 @@
 import { channelMention, ChannelType, Role, roleMention, SlashCommandBuilder, TextChannel } from 'discord.js';
 import { botEnv } from '../config/botSettings';
-import { genMatch, matchMap } from '../match';
+import { genMatch, matchFlowSetting, matchMap } from '../match';
 import type { CommandFunction, OptionType } from '../types';
-import { logCommandResult, replyCommandFail } from '../utils';
+import { genCommandReplier } from '../utils';
 
 const commandName = 'match_set';
 
@@ -14,26 +14,18 @@ type Options_MatchSet = {
 };
 
 const MatchSet: CommandFunction<Options_MatchSet> = async (interaction, { channel, team1, team2, force }) => {
-    if (!botEnv.hasAdminPermission(interaction.member)) return await replyCommandFail(interaction, commandName, '並非主辦方，無法使用該指令');
-    if (!(channel instanceof TextChannel)) return await replyCommandFail(interaction, commandName, '指定頻道非純文字頻道');
-    if (!(team1 instanceof Role) || !(team2 instanceof Role)) return await replyCommandFail(interaction, commandName, '指定身分組不符需求');
+    const reply = genCommandReplier(interaction, commandName);
+    if (!botEnv.hasAdminPermission(interaction.member)) return await reply.fail('並非主辦方，無法使用該指令');
+    if (!(channel instanceof TextChannel)) return await reply.fail('指定頻道非純文字頻道');
+    if (!(team1 instanceof Role) || !(team2 instanceof Role)) return await reply.fail('指定身分組不符需求');
     if (!force && matchMap.has(channel.id))
-        return await replyCommandFail(
-            interaction,
-            commandName,
-            '該頻道尚留存比賽分組指定，可使用match_clear指令先清除該頻道舊有指定，或是在該指令附加 { force: true } 選項'
-        );
+        return await reply.fail('該頻道尚留存比賽分組指定，可使用match_clear指令先清除該頻道舊有指定，或是在該指令附加 { force: true } 選項');
 
-    matchMap.set(channel.id, genMatch(channel, [team1, team2]));
-    await interaction.reply({
-        content: `指定比賽分組：${roleMention(team1.id)} vs ${roleMention(team2.id)} ， 指定BP頻道：${channelMention(channel.id)}`,
-        ephemeral: true,
-    });
-    await logCommandResult(
-        interaction.user.username,
-        commandName,
-        `指定比賽分組：${team1.name} vs ${team2.name} ， 指定BP頻道：${channel.name}`
+    matchMap.set(
+        channel.id,
+        genMatch(channel, [team1, team2], matchFlowSetting[botEnv.get('matchFlow') as string] || matchFlowSetting['normalMatchFlow'])
     );
+    await reply.success(`指定比賽分組：${team1.name} vs ${team2.name} ， 指定BP頻道：${channel.name}`, true, true);
 };
 
 export default {

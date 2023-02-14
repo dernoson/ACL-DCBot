@@ -1,9 +1,9 @@
 import { SlashCommandBuilder, TextChannel } from 'discord.js';
 import { botEnv } from '../config/botSettings';
-import { Match, matchMap, normalMatchFlow } from '../match';
-import { getMatchStageDescription, getNowTeam } from '../match/functions';
+import { Match, matchMap } from '../match';
+import { getMatchStageDescription, getNowFlow, getNowTeam } from '../match/functions';
 import { CommandFunction, OptionType } from '../types';
-import { replyCommandFail } from '../utils';
+import { genCommandReplier } from '../utils';
 
 const commandName = 'log_match';
 
@@ -12,11 +12,12 @@ type Options_LogMatch = {
 };
 
 const LogMatch: CommandFunction<Options_LogMatch> = async (interaction, { channel }) => {
-    if (!botEnv.hasAdminPermission(interaction.member)) return await replyCommandFail(interaction, commandName, '並非主辦方，無法使用該指令');
+    const reply = genCommandReplier(interaction, commandName);
+    if (!botEnv.hasAdminPermission(interaction.member)) return await reply.fail('並非主辦方，無法使用該指令');
     if (channel) {
-        if (!(channel instanceof TextChannel)) return await replyCommandFail(interaction, commandName, '指定頻道非純文字頻道');
+        if (!(channel instanceof TextChannel)) return await reply.fail('指定頻道非純文字頻道');
         const match = matchMap.get(channel.id);
-        if (!match) return await replyCommandFail(interaction, commandName, '頻道非BP使用頻道');
+        if (!match) return await reply.fail('頻道非BP使用頻道');
         interaction.reply({ content: genMatchString(match), ephemeral: true });
     } else {
         if (!matchMap.size) {
@@ -32,11 +33,11 @@ const LogMatch: CommandFunction<Options_LogMatch> = async (interaction, { channe
 const genMatchString = (match: Match) => {
     const [teamA, teamB] = match.teams;
     const nowTeam = getNowTeam(match);
-    const nowFlow = normalMatchFlow.at(match.flowIndex);
+    const nowFlow = getNowFlow(match);
     return `
 **${match.channel.name}: ${teamA.teamRole.name} vs ${teamB.teamRole.name}**
 狀態：${match.state} / ${nowFlow ? nowTeam.teamRole.name + ' ' + nowFlow.option + ' ' + nowFlow.amount : '無'}
-${getMatchStageDescription(match, normalMatchFlow)}
+${getMatchStageDescription(match)}
 `;
 };
 

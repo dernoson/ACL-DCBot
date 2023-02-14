@@ -6,7 +6,6 @@ import { IntentOptions } from './config/optionSettings';
 import { botEnv } from './config/botSettings';
 
 import SetEnv from './commands/SetEnv';
-import Test from './commands/Test';
 import MatchSet from './commands/MatchSet';
 import MatchStart from './commands/MatchStart';
 import MatchClear from './commands/MatchClear';
@@ -18,7 +17,6 @@ import SetConfig from './commands/SetConfig';
 import Select from './commands/Select';
 
 const commands: CommandExport[] = [
-    Test,
     Select,
     MatchSet,
     MatchStart,

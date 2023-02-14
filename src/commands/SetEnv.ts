@@ -1,7 +1,7 @@
 import { channelMention, ChannelType, GuildMember, PermissionFlagsBits, Role, roleMention, SlashCommandBuilder, TextChannel } from 'discord.js';
 import { botEnv, dumpSetting } from '../config/botSettings';
 import type { CommandFunction, OptionType } from '../types';
-import { replyCommandFail } from '../utils';
+import { genCommandReplier } from '../utils';
 
 const commandName = 'set_env';
 
@@ -11,8 +11,9 @@ type Options_SetEnv = {
 };
 
 const SetEnv: CommandFunction<Options_SetEnv> = async (interaction, { admin_role, log_channel }) => {
+    const reply = genCommandReplier(interaction, commandName);
     if (!(interaction.member instanceof GuildMember) || !interaction.member.permissions.has(PermissionFlagsBits.Administrator))
-        return await replyCommandFail(interaction, commandName, '並非管理員，無法使用該指令');
+        return await reply.fail('並非管理員，無法使用該指令');
 
     const admin = admin_role instanceof Role ? admin_role : undefined;
     const logChannel = log_channel instanceof TextChannel ? log_channel : undefined;

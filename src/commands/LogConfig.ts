@@ -1,14 +1,15 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { botEnv, getSetting } from '../config/botSettings';
 import { CommandFunction } from '../types';
-import { replyCommandFail } from '../utils';
+import { genCommandReplier } from '../utils';
 
 const commandName = 'log_config';
 
 type Options_LogConfig = {};
 
 const LogConfig: CommandFunction<Options_LogConfig> = async (interaction) => {
-    if (!botEnv.hasAdminPermission(interaction.member)) return await replyCommandFail(interaction, commandName, '並非主辦方，無法使用該指令');
+    const reply = genCommandReplier(interaction, commandName);
+    if (!botEnv.hasAdminPermission(interaction.member)) return await reply.fail('並非主辦方，無法使用該指令');
     const botSettings = getSetting();
     interaction.reply({
         content: Object.getOwnPropertyNames(botSettings)

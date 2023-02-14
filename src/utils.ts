@@ -29,13 +29,21 @@ export const getCommandOptions = (options: ChatInputCommandInteraction<CacheType
     }, {});
 };
 
-export const replyCommandFail = async (interaction: ChatInputCommandInteraction<CacheType>, commandName: string, content: string) => {
+const replyCommandFail = async (interaction: ChatInputCommandInteraction<CacheType>, commandName: string, content: string) => {
     await interaction.reply({ content, ephemeral: true });
     await botEnv.log(`> **[ ${commandName} ] fail**\n\`by ${interaction.user.username} at <${new Date()}>\`\n${content}`);
 };
 
-export const logCommandResult = async (userName: string, commandName: string, content: string) => {
+const logCommandResult = async (userName: string, commandName: string, content: string) => {
     await botEnv.log(`> **[ ${commandName} ] success**\n\`by ${userName} at <${new Date()}>\`\n${content}`);
 };
+
+export const genCommandReplier = (interaction: ChatInputCommandInteraction<CacheType>, commandName: string) => ({
+    fail: async (content: string) => await replyCommandFail(interaction, commandName, content),
+    success: async (content: string, replyToUser?: boolean, ephemeral?: boolean) => {
+        await logCommandResult(interaction.user.username, commandName, content);
+        replyToUser && interaction.reply({ content, ephemeral });
+    },
+});
 
 export const getAdminMention = () => (botEnv.admin ? roleMention(botEnv.admin.id) : '伺服器管理員');

@@ -4,13 +4,12 @@ import { normalMentionOptions } from '../config/optionSettings';
 import { getAdminMention } from '../utils';
 import { BP, Flow, Match, MatchState } from './types';
 
-export const setMatchStageNext = (match: Match, matchFlow: Flow[]) =>
-    getMatchStageDescription(match, matchFlow) + setStageToDo(match, matchFlow);
+export const setMatchStageNext = (match: Match) => getMatchStageDescription(match) + setStageToDo(match);
 
-export const getMatchStageDescription = (match: Match, matchFlow: Flow[]) => {
+export const getMatchStageDescription = (match: Match) => {
     const [teamA, teamB] = match.teams;
-    const banLimit = calcMatchFlow(matchFlow, 'ban');
-    const pickLimit = calcMatchFlow(matchFlow, 'pick');
+    const banLimit = calcMatchFlow(match.flow, 'ban');
+    const pickLimit = calcMatchFlow(match.flow, 'pick');
 
     let banDesc =
         getOperatorListDescription(teamA.teamRole.name, teamA.ban, banLimit) +
@@ -25,8 +24,8 @@ export const getMatchStageDescription = (match: Match, matchFlow: Flow[]) => {
     return banDesc + pickDesc;
 };
 
-const setStageToDo = (match: Match, matchFlow: Flow[]) => {
-    const nowFlow = matchFlow.at(match.flowIndex);
+const setStageToDo = (match: Match) => {
+    const nowFlow = getNowFlow(match);
     if (!nowFlow) {
         match.state = MatchState.complete;
         match.timeStamp = Date.now();
@@ -56,9 +55,10 @@ export const setBPTimeLimit = (match: Match, timeout: number) => {
     }, timeout * 1000);
 };
 
-export const genMatch = (channel: TextChannel, teams: [Role, Role]): Match => ({
+export const genMatch = (channel: TextChannel, teams: [Role, Role], flow: Flow[]): Match => ({
     channel,
     teams: [genBP(teams[0]), genBP(teams[1])],
+    flow,
     flowIndex: 0,
     isLastTeam: false,
     state: MatchState.prepare,
@@ -78,6 +78,8 @@ export const calcMatchFlow = <T extends Flow>(flow: T[], option: string) => {
 };
 
 export const getNowTeam = (match: Match) => match.teams[+match.isLastTeam];
+
+export const getNowFlow = (match: Match) => match.flow.at(match.flowIndex);
 
 export const getOperatorListDescription = (teamName: string, operatorList: string[], limit: number) => {
     return operatorList.length ? `${teamName} (${operatorList.length}/${limit})：\n\`\`\`${operatorList.join(' ')}\`\`\`` : '';
