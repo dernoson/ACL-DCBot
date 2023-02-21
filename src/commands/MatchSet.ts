@@ -1,6 +1,7 @@
-import { channelMention, ChannelType, Role, roleMention, SlashCommandBuilder, TextChannel } from 'discord.js';
+import { ChannelType, Role, SlashCommandBuilder, TextChannel } from 'discord.js';
 import { botEnv } from '../config/botSettings';
-import { genMatch, matchFlowSetting, matchMap } from '../match';
+import { defaultMatchFlowSetting, genMatch, MatchFlowKey, matchFlowMap, matchMap } from '../match';
+import { MatchFlowSetting } from '../match/types';
 import type { CommandFunction, OptionType } from '../types';
 import { genCommandReplier } from '../utils';
 
@@ -21,11 +22,9 @@ const MatchSet: CommandFunction<Options_MatchSet> = async (interaction, { channe
     if (!force && matchMap.has(channel.id))
         return await reply.fail('該頻道尚留存比賽分組指定，可使用match_clear指令先清除該頻道舊有指定，或是在該指令附加 { force: true } 選項');
 
-    matchMap.set(
-        channel.id,
-        genMatch(channel, [team1, team2], matchFlowSetting[botEnv.get('matchFlow') as string] || matchFlowSetting['normalMatchFlow'])
-    );
-    await reply.success(`指定比賽分組：${team1.name} vs ${team2.name} ， 指定BP頻道：${channel.name}`, true, true);
+    const flowSetting: MatchFlowSetting = matchFlowMap[botEnv.get('MatchFlow') as MatchFlowKey] || defaultMatchFlowSetting;
+    matchMap.set(channel.id, genMatch(channel, [team1, team2], flowSetting));
+    await reply.success(`指定比賽分組：${team1.name} vs ${team2.name} ， 指定BP頻道：${channel.name}\n${flowSetting.desc}`, true, true);
 };
 
 export default {

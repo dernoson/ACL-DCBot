@@ -12,8 +12,8 @@ class BotEnv {
     onBotReady(client: Client<true>) {
         this.guild = client.guilds.cache.first();
         if (!this.guild) throw 'Have no guild';
-        this.admin = this.getRole('admin');
-        this.logChannel = this.getTextChannel('logChannel');
+        this.admin = this.getRole('Admin');
+        this.logChannel = this.getTextChannel('LogChannel');
         console.log('主辦方身分組指定: ', this.admin?.name);
         console.log('機器人log頻道指定: ', this.logChannel?.name);
     }

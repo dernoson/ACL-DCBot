@@ -47,3 +47,5 @@ export const genCommandReplier = (interaction: ChatInputCommandInteraction<Cache
 });
 
 export const getAdminMention = () => (botEnv.admin ? roleMention(botEnv.admin.id) : '伺服器管理員');
+
+export const getObjectKeys = <O extends {}>(obj: O) => Object.getOwnPropertyNames(obj) as (keyof O)[];

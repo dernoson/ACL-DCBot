@@ -2,14 +2,14 @@ import { Role, roleMention, TextChannel } from 'discord.js';
 import { botEnv } from '../config/botSettings';
 import { normalMentionOptions } from '../config/optionSettings';
 import { getAdminMention } from '../utils';
-import { BP, Flow, Match, MatchState } from './types';
+import { BP, Flow, Match, MatchFlowSetting, MatchState } from './types';
 
 export const setMatchStageNext = (match: Match) => getMatchStageDescription(match) + setStageToDo(match);
 
 export const getMatchStageDescription = (match: Match) => {
     const [teamA, teamB] = match.teams;
-    const banLimit = calcMatchFlow(match.flow, 'ban');
-    const pickLimit = calcMatchFlow(match.flow, 'pick');
+    const banLimit = calcMatchFlow(match.flowSetting.flow, 'ban');
+    const pickLimit = calcMatchFlow(match.flowSetting.flow, 'pick');
 
     let banDesc =
         getOperatorListDescription(teamA.teamRole.name, teamA.ban, banLimit) +
@@ -55,10 +55,10 @@ export const setBPTimeLimit = (match: Match, timeout: number) => {
     }, timeout * 1000);
 };
 
-export const genMatch = (channel: TextChannel, teams: [Role, Role], flow: Flow[]): Match => ({
+export const genMatch = (channel: TextChannel, teams: [Role, Role], flowSetting: MatchFlowSetting): Match => ({
     channel,
     teams: [genBP(teams[0]), genBP(teams[1])],
-    flow,
+    flowSetting,
     flowIndex: 0,
     isLastTeam: false,
     state: MatchState.prepare,
@@ -79,7 +79,7 @@ export const calcMatchFlow = <T extends Flow>(flow: T[], option: string) => {
 
 export const getNowTeam = (match: Match) => match.teams[+match.isLastTeam];
 
-export const getNowFlow = (match: Match) => match.flow.at(match.flowIndex);
+export const getNowFlow = (match: Match) => match.flowSetting.flow.at(match.flowIndex);
 
 export const getOperatorListDescription = (teamName: string, operatorList: string[], limit: number) => {
     return operatorList.length ? `${teamName} (${operatorList.length}/${limit})：\n\`\`\`${operatorList.join(' ')}\`\`\`` : '';

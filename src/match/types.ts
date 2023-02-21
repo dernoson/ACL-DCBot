@@ -1,9 +1,16 @@
 import { Role, TextChannel } from 'discord.js';
 
+export type MatchFlowSetting = {
+    desc: string;
+    flow: Flow[];
+};
+
+export const createMatchFlowMap = <M extends { [key: string]: MatchFlowSetting }>(map: M) => map;
+
 export type Match = {
     channel: TextChannel;
     teams: [BP, BP];
-    flow: Flow[];
+    flowSetting: MatchFlowSetting;
     flowIndex: number;
     isLastTeam: boolean;
     state: MatchState;
