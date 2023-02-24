@@ -1,8 +1,8 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { botEnv, dumpSetting } from '../config/botSettings';
 import { defaultMatchFlowSetting, matchFlowMap, matchFlowMapKeysArr } from '../match';
-import { CommandFunction, OptionType } from '../types';
-import { genCommandReplier, getObjectKeys } from '../utils';
+import { CommandFunction, OptionType } from './types';
+import { genCommandReplier, getObjectKeys } from './utils';
 
 const commandName = 'set_config';
 

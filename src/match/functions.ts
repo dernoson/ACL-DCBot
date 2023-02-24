@@ -11,6 +11,9 @@ export const getMatchStageDescription = (match: Match) => {
     const banLimit = calcMatchFlow(match.flowSetting.flow, 'ban');
     const pickLimit = calcMatchFlow(match.flowSetting.flow, 'pick');
 
+    const teamAban = teamA.ban.join(' ');
+    const teamApick = teamA.pick;
+
     let banDesc =
         getOperatorListDescription(teamA.teamRole.name, teamA.ban, banLimit) +
         getOperatorListDescription(teamB.teamRole.name, teamB.ban, banLimit);
@@ -55,32 +58,27 @@ export const setBPTimeLimit = (match: Match, timeout: number) => {
     }, timeout * 1000);
 };
 
-export const genMatch = (channel: TextChannel, teams: [Role, Role], flowSetting: MatchFlowSetting): Match => ({
+export const createMatch = (channel: TextChannel, teams: [Role, Role], flowSetting: MatchFlowSetting): Match => ({
     channel,
-    teams: [genBP(teams[0]), genBP(teams[1])],
+    teams,
     flowSetting,
     flowIndex: 0,
-    isLastTeam: false,
     state: MatchState.prepare,
     timeStamp: Date.now(),
 });
 
-export const genBP = (teamRole: Role): BP => ({ teamRole, ban: [], pick: [] });
+export const createBP = (): BP => ({ idx: 0, ban: [[], []], pick: [[], []] });
 
-export const toUnique = (operators: string[]) => Array.from(new Set(operators));
+export const getUnique = (operators: string[]) => Array.from(new Set(operators));
 
 export const getDuplicate = (operators: string[], { ban, pick }: BP) => {
     return operators.filter((name) => ban.includes(name) || pick.includes(name));
-};
-
-export const calcMatchFlow = <T extends Flow>(flow: T[], option: string) => {
-    return flow.filter((stage) => option == stage.option).reduce((prev, { amount }) => prev + amount, 0) / 2;
 };
 
 export const getNowTeam = (match: Match) => match.teams[+match.isLastTeam];
 
 export const getNowFlow = (match: Match) => match.flowSetting.flow.at(match.flowIndex);
 
-export const getOperatorListDescription = (teamName: string, operatorList: string[], limit: number) => {
-    return operatorList.length ? `${teamName} (${operatorList.length}/${limit})：\n\`\`\`${operatorList.join(' ')}\`\`\`` : '';
-};
+// export const getOperatorListDescription = (teamName: string, operatorList: string[], limit: number) => {
+//     return operatorList.length ? `${teamName} (${operatorList.length}/${limit})：\n\`\`\`${operatorList.join(' ')}\`\`\`` : '';
+// };

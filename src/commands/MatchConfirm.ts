@@ -1,8 +1,8 @@
 import { SlashCommandBuilder, TextChannel, EmbedBuilder } from 'discord.js';
 import { botEnv } from '../config/botSettings';
 import { matchMap, MatchState } from '../match';
-import { CommandFunction } from '../types';
-import { genCommandReplier } from '../utils';
+import { CommandFunction } from './types';
+import { genCommandReplier } from './utils';
 
 const commandName = 'match_confirm';
 

@@ -1,7 +1,7 @@
 import { channelMention, ChannelType, GuildMember, PermissionFlagsBits, Role, roleMention, SlashCommandBuilder, TextChannel } from 'discord.js';
 import { botEnv, dumpSetting } from '../config/botSettings';
-import type { CommandFunction, OptionType } from '../types';
-import { genCommandReplier } from '../utils';
+import type { CommandFunction, OptionType } from './types';
+import { genCommandReplier } from './utils';
 
 const commandName = 'set_env';
 

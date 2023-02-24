@@ -2,8 +2,8 @@ import { SlashCommandBuilder, TextChannel } from 'discord.js';
 import { botEnv } from '../config/botSettings';
 import { Match, matchMap } from '../match';
 import { getMatchStageDescription, getNowFlow, getNowTeam } from '../match/functions';
-import { CommandFunction, OptionType } from '../types';
-import { genCommandReplier } from '../utils';
+import { CommandFunction, OptionType } from './types';
+import { genCommandReplier } from './utils';
 
 const commandName = 'log_match';
 

@@ -1,21 +1,27 @@
 import { Role, TextChannel } from 'discord.js';
 
-export type MatchFlowSetting = {
-    desc: string;
-    flow: Flow[];
-};
-
-export const createMatchFlowMap = <M extends { [key: string]: MatchFlowSetting }>(map: M) => map;
-
 export type Match = {
     channel: TextChannel;
-    teams: [BP, BP];
+    teams: [Role, Role];
     flowSetting: MatchFlowSetting;
     flowIndex: number;
-    isLastTeam: boolean;
     state: MatchState;
     timeStamp: number;
 };
+
+export type MatchFlowSetting<T extends string = string> = {
+    desc: string;
+    flow: Flow<T>[];
+};
+
+export type Flow<optionType = string> = {
+    option: optionType;
+    amount: number;
+};
+
+export type BPOption = 'ban' | 'pick';
+
+export type BPEXOption = BPOption | 'exchange';
 
 export const enum MatchState {
     prepare = '準備中',
@@ -26,14 +32,7 @@ export const enum MatchState {
 }
 
 export type BP = {
-    teamRole: Role;
-    ban: string[];
-    pick: string[];
-};
-
-export type BPOption = 'ban' | 'pick';
-
-export type Flow<optionType = string> = {
-    option: optionType;
-    amount: number;
+    idx: 0 | 1;
+    ban: [string[], string[]];
+    pick: [string[], string[]];
 };

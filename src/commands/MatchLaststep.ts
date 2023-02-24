@@ -2,8 +2,8 @@ import { SlashCommandBuilder, TextChannel } from 'discord.js';
 import { botEnv } from '../config/botSettings';
 import { matchMap, MatchState } from '../match';
 import { getNowFlow, getNowTeam } from '../match/functions';
-import { CommandFunction } from '../types';
-import { genCommandReplier } from '../utils';
+import { CommandFunction } from './types';
+import { genCommandReplier } from './utils';
 
 const commandName = 'match_laststep';
 

@@ -2,8 +2,8 @@ import { ChannelType, Role, SlashCommandBuilder, TextChannel } from 'discord.js'
 import { botEnv } from '../config/botSettings';
 import { defaultMatchFlowSetting, genMatch, MatchFlowKey, matchFlowMap, matchMap } from '../match';
 import { MatchFlowSetting } from '../match/types';
-import type { CommandFunction, OptionType } from '../types';
-import { genCommandReplier } from '../utils';
+import type { CommandFunction, OptionType } from './types';
+import { genCommandReplier } from './utils';
 
 const commandName = 'match_set';
 

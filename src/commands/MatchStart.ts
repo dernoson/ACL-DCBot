@@ -1,7 +1,7 @@
 import { ChannelType, roleMention, SlashCommandBuilder, TextChannel } from 'discord.js';
 import { botEnv } from '../config/botSettings';
-import { CommandFunction, OptionType } from '../types';
-import { genCommandReplier } from '../utils';
+import { CommandFunction, OptionType } from './types';
+import { genCommandReplier } from './utils';
 import { matchMap, MatchState, setMatchStageNext, Match } from '../match';
 import { normalMentionOptions } from '../config/optionSettings';
 

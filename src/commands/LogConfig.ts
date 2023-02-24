@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { botEnv, getSetting } from '../config/botSettings';
-import { CommandFunction } from '../types';
-import { genCommandReplier } from '../utils';
+import { CommandFunction } from './types';
+import { genCommandReplier } from './utils';
 
 const commandName = 'log_config';
 

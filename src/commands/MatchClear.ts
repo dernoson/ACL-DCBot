@@ -1,8 +1,8 @@
 import { ChannelType, SlashCommandBuilder, TextChannel } from 'discord.js';
 import { botEnv } from '../config/botSettings';
 import { matchMap } from '../match';
-import { CommandFunction, OptionType } from '../types';
-import { genCommandReplier } from '../utils';
+import { CommandFunction, OptionType } from './types';
+import { genCommandReplier } from './utils';
 
 const commandName = 'match_clear';
 
