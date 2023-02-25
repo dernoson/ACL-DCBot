@@ -1,7 +1,7 @@
 import { Client, REST, Routes } from 'discord.js';
 import { BotToken, BotClientID } from './secret/tokens';
-import type { CommandExport } from './commands/types';
-import { getCommandOptions } from './utils';
+import type { CommandExport } from './types';
+import { createCommandReplier, getCommandOptions } from './utils';
 import { IntentOptions } from './config/optionSettings';
 import { botEnv } from './config/botSettings';
 
@@ -28,7 +28,9 @@ const commands: CommandExport[] = [
     SetEnv,
     SetConfig,
 ];
+
 const commandsDef = commands.map((o) => o.defs);
+
 const commandsFunc: { [key: string]: CommandExport['func'] } = commands.reduce((prev, curr) => {
     const name = curr.defs.name;
     if (!name) return prev;
@@ -60,7 +62,7 @@ client.on('interactionCreate', async (interaction) => {
 
     const func = commandsFunc[interaction.commandName];
     if (!func) return;
-    func(interaction, getCommandOptions(interaction.options, client));
+    func(createCommandReplier(interaction, interaction.commandName), getCommandOptions(interaction.options, client));
 });
 
 client.login(BotToken);

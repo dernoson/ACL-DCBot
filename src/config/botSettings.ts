@@ -1,4 +1,15 @@
-import { CacheType, ChatInputCommandInteraction, Client, Guild, GuildMember, PermissionFlagsBits, Role, TextChannel, User } from 'discord.js';
+import {
+    CacheType,
+    ChatInputCommandInteraction,
+    Client,
+    Guild,
+    GuildMember,
+    PermissionFlagsBits,
+    Role,
+    roleMention,
+    TextChannel,
+    User,
+} from 'discord.js';
 import settings from './botSettings.json' assert { type: 'json' };
 import fs from 'fs';
 
@@ -56,5 +67,7 @@ export const dumpSetting = () => {
 };
 
 export const getSetting = () => botSettings;
+
+export const getAdminMention = () => (botEnv.admin ? roleMention(botEnv.admin.id) : '伺服器管理員');
 
 export const botEnv = new BotEnv();

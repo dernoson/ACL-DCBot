@@ -1,19 +1,7 @@
-import type {
-    Awaitable,
-    CacheType,
-    ChatInputCommandInteraction,
-    User,
-    CommandInteractionOption,
-    SlashCommandBuilder,
-    Channel,
-} from 'discord.js';
+import type { Awaitable, CacheType, ChatInputCommandInteraction, User, CommandInteractionOption, Channel } from 'discord.js';
+import { CommandReplier } from './utils';
 
 export type CommandFunction<O extends {} = any> = (interaction: ChatInputCommandInteraction<CacheType>, options: O) => Awaitable<void>;
-
-export type CommandExport = {
-    func: CommandFunction;
-    defs: Partial<SlashCommandBuilder>;
-};
 
 export type OptionType = {
     Subcommand: string;
@@ -27,4 +15,9 @@ export type OptionType = {
     Mentionable: NonNullable<CommandInteractionOption<CacheType>['member' | 'role' | 'user']>;
     Number: number;
     Attachment: NonNullable<CommandInteractionOption<CacheType>['attachment']>;
+};
+
+export type ConfigOption = {
+    desc: string;
+    handler: (replier: CommandReplier, options: { value?: string }) => Awaitable<void>;
 };
