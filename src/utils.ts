@@ -1,7 +1,7 @@
 import { ApplicationCommandOptionType, CacheType, ChatInputCommandInteraction, Client } from 'discord.js';
 import { botEnv } from './config/botSettings';
 import { normalMentionOptions } from './config/optionSettings';
-import { CommandReplier, OptionType } from './types';
+import { CommandContext, OptionType } from './types';
 
 export const getObjectKeys = <O extends {}>(obj: O) => Object.getOwnPropertyNames(obj) as (keyof O)[];
 
@@ -52,25 +52,18 @@ export const getCommandOptions = (options: ChatInputCommandInteraction<CacheType
     }, {});
 };
 
-const reply = async (interaction: ChatInputCommandInteraction<CacheType>, content: string, ephemeral = false) => {
-    await interaction.reply({ content, ephemeral, allowedMentions: normalMentionOptions });
-};
-
 const logCommandResult = async (commandName: string, option: 'success' | 'fail', username: string, content: string) => {
     await botEnv.log(`> **[ ${commandName} ] ${option}**\n\`by ${username} at <${new Date()}>\`\n${content}`);
 };
 
-export const createCommandReplier = (interaction: ChatInputCommandInteraction<CacheType>, commandName: string): CommandReplier => ({
+export const createCommandContext = (interaction: ChatInputCommandInteraction<CacheType>, commandName: string): CommandContext => ({
     interaction,
     fail: async (content: string) => {
-        await reply(interaction, content, true);
         await logCommandResult(commandName, 'fail', interaction.user.username, content);
+        return { content, ephemeral: true };
     },
     success: async (content: string) => {
-        await reply(interaction, content, true);
         await logCommandResult(commandName, 'success', interaction.user.username, content);
-    },
-    reply: async (content: string, ephemeral = false) => {
-        await reply(interaction, content, ephemeral);
+        return { content, ephemeral: true };
     },
 });

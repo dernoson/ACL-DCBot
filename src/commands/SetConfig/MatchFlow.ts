@@ -7,16 +7,16 @@ export const MatchFlow: ConfigOption = {
         if (!value) {
             botEnv.set('BPTimeLimit', undefined);
             dumpSetting();
-            await replier.success('[設定機器人環境] BP選角時限秒數：不限');
+            return await replier.success('[設定機器人環境] BP選角時限秒數：不限');
         } else if (isNaN(+value)) {
-            await replier.fail('BPTimeLimit 僅可輸入純數字');
+            return await replier.fail('BPTimeLimit 僅可輸入純數字');
         } else if (+value < 1 || +value > 1000) {
-            await replier.fail('BPTimeLimit 僅可接受 1~1000 的數值');
+            return await replier.fail('BPTimeLimit 僅可接受 1~1000 的數值');
         } else {
             const second = +value;
             botEnv.set('BPTimeLimit', +second);
             dumpSetting();
-            await replier.success(`[設定機器人環境] BP選角時限秒數： ${second} 秒`);
+            return await replier.success(`[設定機器人環境] BP選角時限秒數： ${second} 秒`);
         }
     },
 };

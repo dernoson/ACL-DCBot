@@ -1,7 +1,6 @@
-import { Awaitable } from 'discord.js';
-import { CommandReplier } from '../../types';
+import { CommandContext, CommandResult } from '../../types';
 
 export type ConfigOption = {
     desc: string;
-    handler: (replier: CommandReplier, value: string | undefined) => Awaitable<void>;
+    handler: (replier: CommandContext, value: string | undefined) => Promise<CommandResult>;
 };

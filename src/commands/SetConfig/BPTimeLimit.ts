@@ -8,14 +8,14 @@ export const BPTimeLimit: ConfigOption = {
         if (!value) {
             botEnv.set('MatchFlow', undefined);
             dumpSetting();
-            await replier.success(`[設定機器人環境] BP流程設置：${matchFlowMap[defaultMatchFlowKey].desc}`);
+            return await replier.success(`[設定機器人環境] BP流程設置：${matchFlowMap[defaultMatchFlowKey].desc}`);
         } else if (matchFlowMapKeysArr.includes(value as any)) {
             botEnv.set('MatchFlow', value);
             dumpSetting();
-            await replier.success(`[設定機器人環境] BP流程設置：${matchFlowMap[value].desc}`);
+            return await replier.success(`[設定機器人環境] BP流程設置：${matchFlowMap[value].desc}`);
         } else {
             const settingDesc = matchFlowMapKeysArr.map((key) => `\`${key}\` : ${matchFlowMap[key].desc}`).join('\n');
-            await replier.fail(`MatchFlow僅可接受以下字串值：\n${settingDesc}`);
+            return await replier.fail(`MatchFlow僅可接受以下字串值：\n${settingDesc}`);
         }
     },
 };

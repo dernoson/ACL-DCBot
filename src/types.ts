@@ -1,25 +1,23 @@
-import type {
-    Awaitable,
-    CacheType,
-    Channel,
-    ChatInputCommandInteraction,
-    CommandInteractionOption,
-    SlashCommandBuilder,
-    User,
-} from 'discord.js';
+import type { CacheType, Channel, ChatInputCommandInteraction, CommandInteractionOption, SlashCommandBuilder, User } from 'discord.js';
 
 export type CommandExport = {
-    func: CommandFunction;
+    func: CommandFunction<any>;
     defs: Partial<SlashCommandBuilder>;
 };
 
-export type CommandFunction<O extends {} = any> = (replier: CommandReplier, options: O) => Awaitable<void>;
+export type CommandFunction<O extends {} = {}> = (replier: CommandContext, options: O) => Promise<CommandResult>;
 
-export type CommandReplier = {
+export type CommandResult =
+    | string
+    | {
+          content: string;
+          ephemeral?: boolean;
+      };
+
+export type CommandContext = {
     interaction: ChatInputCommandInteraction<CacheType>;
-    fail: (content: string) => Promise<void>;
-    success: (content: string) => Promise<void>;
-    reply: (content: string, ephemeral?: boolean) => Promise<void>;
+    fail: (content: string) => Promise<CommandResult>;
+    success: (content: string) => Promise<CommandResult>;
 };
 
 export type OptionType = {

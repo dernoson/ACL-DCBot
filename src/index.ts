@@ -1,8 +1,8 @@
 import { Client, REST, Routes } from 'discord.js';
 import { BotToken, BotClientID } from './secret/tokens';
 import type { CommandExport } from './types';
-import { createCommandReplier, getCommandOptions } from './utils';
-import { IntentOptions } from './config/optionSettings';
+import { createCommandContext, getCommandOptions } from './utils';
+import { IntentOptions, normalMentionOptions } from './config/optionSettings';
 import { botEnv } from './config/botSettings';
 
 import SetEnv from './commands/SetEnv';
@@ -29,9 +29,9 @@ const commands: CommandExport[] = [
     SetConfig,
 ];
 
-const commandsDef = commands.map((o) => o.defs);
+const commandDefs = commands.map((o) => o.defs);
 
-const commandsFunc: { [key: string]: CommandExport['func'] } = commands.reduce((prev, curr) => {
+const commandHandlers: { [key: string]: CommandExport['func'] } = commands.reduce((prev, curr) => {
     const name = curr.defs.name;
     if (!name) return prev;
     return { ...prev, [name]: curr.func };
@@ -42,7 +42,7 @@ const rest = new REST().setToken(BotToken);
 (async () => {
     try {
         console.log('Started refreshing application (/) commands.');
-        await rest.put(Routes.applicationCommands(BotClientID), { body: commandsDef });
+        await rest.put(Routes.applicationCommands(BotClientID), { body: commandDefs });
         console.log('Successfully reloaded application (/) commands.');
     } catch (error) {
         console.error(error);
@@ -60,9 +60,11 @@ client.on('interactionCreate', async (interaction) => {
     if (!client.isReady) return;
     if (!interaction.isChatInputCommand()) return;
 
-    const func = commandsFunc[interaction.commandName];
-    if (!func) return;
-    func(createCommandReplier(interaction, interaction.commandName), getCommandOptions(interaction.options, client));
+    const handler = commandHandlers[interaction.commandName];
+    if (!handler) return;
+    const result = await handler(createCommandContext(interaction, interaction.commandName), getCommandOptions(interaction.options, client));
+    const content = typeof result == 'string' ? result : result.content;
+    interaction.reply({ content, ephemeral: typeof result != 'string' && result.ephemeral, allowedMentions: normalMentionOptions });
 });
 
 client.login(BotToken);
