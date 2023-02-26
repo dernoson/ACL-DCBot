@@ -1,31 +1,26 @@
 import { SlashCommandBuilder, TextChannel, EmbedBuilder } from 'discord.js';
 import { botEnv } from '../config/botSettings';
 import { matchMap, MatchState } from '../match';
-import { CommandFunction } from './types';
-import { genCommandReplier } from './utils';
+import { CommandFunction } from '../types';
+import { checkAdminPermission, commandSuccessResp } from '../utils';
 
-const commandName = 'match_confirm';
+const MatchConfirm: CommandFunction = (ctx) => {
+    checkAdminPermission(ctx);
 
-type Options_MatchStart = {};
-
-const MatchConfirm: CommandFunction<Options_MatchStart> = async (interaction) => {
-    const reply = genCommandReplier(interaction, commandName);
-    if (!botEnv.hasAdminPermission(interaction.member)) return await reply.fail('並非主辦方，無法使用該指令');
-
-    const { channel } = interaction;
-    if (!(channel instanceof TextChannel)) return await reply.fail('指定頻道非純文字頻道');
+    const { channel } = ctx;
+    if (!(channel instanceof TextChannel)) throw '指定頻道非純文字頻道';
     const match = matchMap.get(channel.id);
-    if (!match) return await reply.fail('頻道非BP使用頻道');
-    if (match.state != MatchState.complete) return await reply.fail('頻道BP流程尚未處於可確認狀態');
+    if (!match) throw '頻道非BP使用頻道';
+    if (match.state != MatchState.complete) throw '頻道BP流程尚未處於可確認狀態';
 
     match.state = MatchState.fixed;
-    await reply.success(`已確認 ${match.channel.name} 的BP流程`, true);
+    const result = commandSuccessResp(`已確認 ${match.channel.name} 的BP流程`);
+    if (!botEnv.logChannel) return result;
 
-    if (!botEnv.logChannel) return;
     const [teamA, teamB] = match.teams;
     const embed = new EmbedBuilder()
         .setTitle(`${teamA.teamRole.name} vs ${teamB.teamRole.name}`)
-        .setAuthor({ name: interaction.user.username })
+        .setAuthor({ name: ctx.user.username })
         .setDescription('BP流程確認')
         .addFields(
             {
@@ -49,10 +44,11 @@ const MatchConfirm: CommandFunction<Options_MatchStart> = async (interaction) =>
         .setTimestamp()
         .setColor('DarkAqua');
 
-    await botEnv.logChannel.send({ embeds: [embed] });
+    botEnv.logChannel.send({ embeds: [embed] });
+    return result;
 };
 
 export default {
     func: MatchConfirm,
-    defs: new SlashCommandBuilder().setName(commandName).setDescription('[ 主辦方指令 ] 確認BP流程'),
+    defs: new SlashCommandBuilder().setName('match_confirm').setDescription('[ 主辦方指令 ] 確認BP流程'),
 };

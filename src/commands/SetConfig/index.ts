@@ -1,9 +1,8 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { botEnv } from '../../config/botSettings';
 import { BPTimeLimit } from './BPTimeLimit';
 import { MatchFlow } from './MatchFlow';
 import { CommandFunction, OptionType } from '../../types';
-import { getObjectKeys } from '../../utils';
+import { checkAdminPermission, getObjectKeys } from '../../utils';
 import { ConfigOption } from './types';
 
 type Options_SetConfig = {
@@ -11,10 +10,9 @@ type Options_SetConfig = {
     value?: OptionType['String'];
 };
 
-const SetConfig: CommandFunction<Options_SetConfig> = async (ctx, args) => {
-    if (!botEnv.hasAdminPermission(ctx.interaction.member)) return await ctx.fail('並非主辦方，無法使用該指令');
-
-    return await configOptions[args.option].handler(ctx, args.value);
+const SetConfig: CommandFunction<Options_SetConfig> = (ctx, args) => {
+    checkAdminPermission(ctx);
+    return configOptions[args.option].handler(ctx, args.value);
 };
 
 const createConfigOptionMap = <M extends { [key: string]: ConfigOption }>(map: M) => map;

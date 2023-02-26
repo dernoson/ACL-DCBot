@@ -1,41 +1,37 @@
 import { ChannelType, roleMention, SlashCommandBuilder, TextChannel } from 'discord.js';
-import { botEnv } from '../config/botSettings';
-import { CommandFunction, OptionType } from './types';
-import { genCommandReplier } from './utils';
-import { matchMap, MatchState, setMatchStageNext, Match } from '../match';
+import { CommandFunction, OptionType } from '../types';
+
 import { normalMentionOptions } from '../config/optionSettings';
 
-const commandName = 'match_start';
+//TODO try
+import { matchMap } from '../try/matchMap';
+import { checkAdminPermission, commandSuccessResp } from '../utils';
 
 type Options_MatchStart = {
     channel?: OptionType['Channel'];
     all?: OptionType['Boolean'];
 };
 
-const MatchStart: CommandFunction<Options_MatchStart> = async (interaction, { channel, all }) => {
-    const reply = genCommandReplier(interaction, commandName);
-    if (!botEnv.hasAdminPermission(interaction.member)) return await reply.fail('並非主辦方，無法使用該指令');
+const MatchStart: CommandFunction<Options_MatchStart> = (ctx, { channel, all }) => {
+    checkAdminPermission(ctx);
 
     if (all) {
         const startedMatchName: string[] = [];
         matchMap.forEach((match) => {
-            const lastMatchState = match.state;
-            if (lastMatchState != MatchState.prepare && lastMatchState != MatchState.pause) return;
+            if (!match.setStart()) return;
             startedMatchName.push(match.channel.name);
-            sendMatchStart(lastMatchState, match);
         });
-        const content = startedMatchName.length ? `已啟動以下頻道的BP流程：\n${startedMatchName.join('\n')}` : '未啟動任何頻道的BP流程';
-        await reply.success(content, true, true);
-    } else {
-        const targetChannel = channel || interaction.channel;
-        if (!(targetChannel instanceof TextChannel)) return await reply.fail('指定頻道非純文字頻道');
-        const match = matchMap.get(targetChannel.id);
-        if (!match) return await reply.fail('指定頻道非BP使用頻道');
-        const lastMatchState = match.state;
-        if (lastMatchState != MatchState.prepare && lastMatchState != MatchState.pause) return await reply.fail('該頻道BP流程無法啟動');
 
-        await sendMatchStart(lastMatchState, match);
-        await reply.success(`已啟動 ${match.channel.name} 的BP流程`, true, true);
+        return commandSuccessResp(
+            startedMatchName.length ? `已啟動以下頻道的BP流程：\n${startedMatchName.join('\n')}` : '未啟動任何頻道的BP流程'
+        );
+    } else {
+        const targetChannel = channel || ctx.channel;
+        if (!(targetChannel instanceof TextChannel)) throw '指定頻道非純文字頻道';
+        const match = matchMap.get(targetChannel.id);
+        if (!match) throw '指定頻道非BP使用頻道';
+        if (!match.setStart()) throw '該頻道BP流程無法啟動';
+        return commandSuccessResp(`已啟動 ${match.channel.name} 的BP流程`);
     }
 };
 
@@ -53,7 +49,7 @@ async function sendMatchStart(lastMatchState: MatchState, match: Match) {
 export default {
     func: MatchStart,
     defs: new SlashCommandBuilder()
-        .setName(commandName)
+        .setName('match_start')
         .setDescription('[ 主辦方指令 ] 開始BP選角流程')
         .addChannelOption((option) =>
             option

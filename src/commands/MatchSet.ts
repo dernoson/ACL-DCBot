@@ -1,8 +1,12 @@
 import { ChannelType, Role, SlashCommandBuilder, TextChannel } from 'discord.js';
 import { botEnv } from '../config/botSettings';
-import { createMatch, defaultMatchFlowKey, MatchFlowKey, matchFlowMap, matchMap } from '../match';
-import { MatchFlowSetting } from '../match/types';
 import type { CommandFunction, OptionType } from '../types';
+
+//TODO try
+import { matchMap } from '../try/matchMap';
+import { defaultMatchFlowSettingKey, MatchFlowSettingKey, getMatchFlowDesc } from '../try/matchSettings';
+import { Match } from '../try/Match';
+import { checkAdminPermission, commandSuccessResp } from '../utils';
 
 type Options_MatchSet = {
     channel: OptionType['Channel'];
@@ -11,16 +15,19 @@ type Options_MatchSet = {
     force?: OptionType['Boolean'];
 };
 
-const MatchSet: CommandFunction<Options_MatchSet> = async (ctx, { channel, team1, team2, force }) => {
-    if (!botEnv.hasAdminPermission(ctx.interaction.member)) return await ctx.fail('並非主辦方，無法使用該指令');
-    if (!(channel instanceof TextChannel)) return await ctx.fail('指定頻道非純文字頻道');
-    if (!(team1 instanceof Role) || !(team2 instanceof Role)) return await ctx.fail('指定身分組不符需求');
-    if (!force && matchMap.has(channel.id))
-        return await ctx.fail('該頻道尚留存比賽分組指定，可使用match_clear指令先清除該頻道舊有指定，或是在該指令附加 { force: true } 選項');
+const MatchSet: CommandFunction<Options_MatchSet> = (ctx, { channel, team1, team2, force }) => {
+    checkAdminPermission(ctx);
 
-    const flowSetting: MatchFlowSetting = matchFlowMap[(botEnv.get('MatchFlow') as MatchFlowKey) || defaultMatchFlowKey];
-    matchMap.set(channel.id, createMatch(channel, [team1, team2], flowSetting));
-    return await ctx.success(`指定比賽分組：${team1.name} vs ${team2.name} ， 指定BP頻道：${channel.name}\n${flowSetting.desc}`);
+    if (!(channel instanceof TextChannel)) throw '指定頻道非純文字頻道';
+    if (!(team1 instanceof Role) || !(team2 instanceof Role)) throw '指定身分組不符需求';
+    if (!force && matchMap.has(channel.id))
+        throw '該頻道尚留存比賽分組指定，可使用match_clear指令先清除該頻道舊有指定，或是在該指令附加 { force: true } 選項';
+
+    const matchFlowSettingKey = (botEnv.get('MatchFlow') as MatchFlowSettingKey) || defaultMatchFlowSettingKey;
+    matchMap.set(channel.id, new Match(channel, [team1, team2], matchFlowSettingKey));
+    return commandSuccessResp(
+        `指定比賽分組：${team1.name} vs ${team2.name} ， 指定BP頻道：${channel.name}\n${getMatchFlowDesc(matchFlowSettingKey)}`
+    );
 };
 
 export default {

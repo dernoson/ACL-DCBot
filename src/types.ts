@@ -5,20 +5,15 @@ export type CommandExport = {
     defs: Partial<SlashCommandBuilder>;
 };
 
-export type CommandFunction<O extends {} = {}> = (ctx: CommandContext, options: O) => Promise<CommandResult>;
+export type CommandFunction<O extends {} = {}> = (ctx: CommandContext, options: O) => CommandResult;
 
 export type CommandResult =
     | string
     | {
           content: string;
+          log?: string;
           ephemeral?: boolean;
       };
-
-export type CommandContext = {
-    interaction: ChatInputCommandInteraction<CacheType>;
-    fail: (content: string) => Promise<CommandResult>;
-    success: (content: string) => Promise<CommandResult>;
-};
 
 export type OptionType = {
     Subcommand: string;
@@ -33,3 +28,5 @@ export type OptionType = {
     Number: number;
     Attachment: NonNullable<CommandInteractionOption<CacheType>['attachment']>;
 };
+
+export type CommandContext = ChatInputCommandInteraction<CacheType>;

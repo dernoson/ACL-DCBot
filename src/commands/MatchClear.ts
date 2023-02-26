@@ -1,15 +1,15 @@
 import { ChannelType, SlashCommandBuilder, TextChannel } from 'discord.js';
-import { botEnv } from '../config/botSettings';
 import { matchMap } from '../match';
 import { CommandFunction, OptionType } from '../types';
+import { checkAdminPermission, commandSuccessResp } from '../utils';
 
 type Options_MatchStart = {
     channel?: OptionType['Channel'];
     all?: OptionType['Boolean'];
 };
 
-const MatchClear: CommandFunction<Options_MatchStart> = async (ctx, { channel, all }) => {
-    if (!botEnv.hasAdminPermission(ctx.interaction.member)) return await ctx.fail('並非主辦方，無法使用該指令');
+const MatchClear: CommandFunction<Options_MatchStart> = (ctx, { channel, all }) => {
+    checkAdminPermission(ctx);
     if (all) {
         const clearedMatchName: string[] = [];
         matchMap.forEach((match) => {
@@ -17,18 +17,18 @@ const MatchClear: CommandFunction<Options_MatchStart> = async (ctx, { channel, a
             match.timeoutHandler?.cancel();
         });
         matchMap.clear();
-        return await ctx.success(
+        return commandSuccessResp(
             clearedMatchName.length ? `已清除以下頻道的BP流程：\n${clearedMatchName.join('\n')}` : '未清除任何頻道的BP流程'
         );
     } else {
-        const targetChannel = channel || ctx.interaction.channel;
-        if (!(targetChannel instanceof TextChannel)) return await ctx.fail('指定頻道非純文字頻道');
+        const targetChannel = channel || ctx.channel;
+        if (!(targetChannel instanceof TextChannel)) throw '指定頻道非純文字頻道';
         const match = matchMap.get(targetChannel.id);
-        if (!match) return await ctx.fail('指定頻道非BP使用頻道');
+        if (!match) throw '指定頻道非BP使用頻道';
 
         matchMap.delete(targetChannel.id);
         match.timeoutHandler?.cancel();
-        return await ctx.success(`已清除 ${match.channel.name} 的BP流程`);
+        return commandSuccessResp(`已清除 ${match.channel.name} 的BP流程`);
     }
 };
 

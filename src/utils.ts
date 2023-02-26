@@ -1,6 +1,6 @@
-import { ApplicationCommandOptionType, CacheType, ChatInputCommandInteraction, Client } from 'discord.js';
+import { ApplicationCommandOptionType, Client } from 'discord.js';
 import { botEnv } from './config/botSettings';
-import { CommandContext, OptionType } from './types';
+import { CommandContext, CommandResult, OptionType } from './types';
 
 export const getObjectKeys = <O extends {}>(obj: O) => Object.getOwnPropertyNames(obj) as (keyof O)[];
 
@@ -26,7 +26,7 @@ export type TimeoutHandler = {
     cancel: () => void;
 };
 
-export const getCommandOptions = (options: ChatInputCommandInteraction<CacheType>['options'], client: Client<true>) => {
+export const getCommandOptions = (options: CommandContext['options'], client: Client<true>) => {
     const channelCache = client.channels.cache;
     return options.data.reduce<Partial<{ [key: string]: OptionType[keyof OptionType] | null }>>((prev, { type, name, user, role, value }) => {
         switch (type) {
@@ -53,18 +53,12 @@ export const getCommandOptions = (options: ChatInputCommandInteraction<CacheType
     }, {});
 };
 
-const logCommandResult = async (commandName: string, option: 'success' | 'fail', username: string, content: string) => {
-    await botEnv.log(`> **[ ${commandName} ] ${option}**\n\`by ${username} at <${new Date()}>\`\n${content}`);
+export const logCommandResult = (commandName: string, option: 'success' | 'fail', username: string, content: string) => {
+    botEnv.log(`> **[ ${commandName} ] ${option}**\n\`by ${username} at <${new Date()}>\`\n${content}`);
 };
 
-export const createCommandContext = (interaction: ChatInputCommandInteraction<CacheType>, commandName: string): CommandContext => ({
-    interaction,
-    fail: async (content: string) => {
-        await logCommandResult(commandName, 'fail', interaction.user.username, content);
-        return { content, ephemeral: true };
-    },
-    success: async (content: string) => {
-        await logCommandResult(commandName, 'success', interaction.user.username, content);
-        return { content, ephemeral: true };
-    },
-});
+export const commandSuccessResp = (content: string): CommandResult => ({ content, log: content, ephemeral: true });
+
+export const checkAdminPermission = (ctx: CommandContext) => {
+    if (!botEnv.hasAdminPermission(ctx.member)) throw '並非主辦方，無法使用該指令';
+};

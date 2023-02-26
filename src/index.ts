@@ -1,7 +1,7 @@
 import { Client, REST, Routes } from 'discord.js';
 import { BotToken, BotClientID } from './secret/tokens';
-import type { CommandExport } from './types';
-import { createCommandContext, getCommandOptions } from './utils';
+import { CommandExport } from './types';
+import { getCommandOptions, logCommandResult } from './utils';
 import { IntentOptions, normalMentionOptions } from './config/optionSettings';
 import { botEnv } from './config/botSettings';
 
@@ -60,11 +60,22 @@ client.on('interactionCreate', async (interaction) => {
     if (!client.isReady) return;
     if (!interaction.isChatInputCommand()) return;
 
-    const handler = commandHandlers[interaction.commandName];
+    const commandName = interaction.commandName;
+    const username = interaction.user.username;
+    const handler = commandHandlers[commandName];
     if (!handler) return;
-    const result = await handler(createCommandContext(interaction, interaction.commandName), getCommandOptions(interaction.options, client));
-    const content = typeof result == 'string' ? result : result.content;
-    interaction.reply({ content, ephemeral: typeof result != 'string' && result.ephemeral, allowedMentions: normalMentionOptions });
+    try {
+        const result = handler(interaction, getCommandOptions(interaction.options, client));
+        const { content, log } = typeof result == 'string' ? { content: result, log: undefined } : result;
+        log && logCommandResult(commandName, 'success', username, log);
+        await interaction.reply({ content, ephemeral: typeof result != 'string' && result.ephemeral, allowedMentions: normalMentionOptions });
+    } catch (error) {
+        if (typeof error == 'string') logCommandResult(commandName, 'fail', username, error);
+        else {
+            logCommandResult(commandName, 'fail', username, '未知錯誤');
+            console.log(error);
+        }
+    }
 });
 
 client.login(BotToken);
