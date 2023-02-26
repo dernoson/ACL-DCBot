@@ -7,10 +7,10 @@ type Options_SetEnv = {
     log_channel?: OptionType['Channel'];
 };
 
-const SetEnv: CommandFunction<Options_SetEnv> = async (replier, { admin_role, log_channel }) => {
-    const { member, user } = replier.interaction;
+const SetEnv: CommandFunction<Options_SetEnv> = async (ctx, { admin_role, log_channel }) => {
+    const { member, user } = ctx.interaction;
     if (!(member instanceof GuildMember) || !member.permissions.has(PermissionFlagsBits.Administrator))
-        return await replier.fail('並非管理員，無法使用該指令');
+        return await ctx.fail('並非管理員，無法使用該指令');
 
     const admin = admin_role instanceof Role ? admin_role : undefined;
     const logChannel = log_channel instanceof TextChannel ? log_channel : undefined;

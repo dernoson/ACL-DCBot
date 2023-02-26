@@ -5,7 +5,7 @@ export type CommandExport = {
     defs: Partial<SlashCommandBuilder>;
 };
 
-export type CommandFunction<O extends {} = {}> = (replier: CommandContext, options: O) => Promise<CommandResult>;
+export type CommandFunction<O extends {} = {}> = (ctx: CommandContext, options: O) => Promise<CommandResult>;
 
 export type CommandResult =
     | string

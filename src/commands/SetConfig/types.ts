@@ -2,5 +2,5 @@ import { CommandContext, CommandResult } from '../../types';
 
 export type ConfigOption = {
     desc: string;
-    handler: (replier: CommandContext, value: string | undefined) => Promise<CommandResult>;
+    handler: (ctx: CommandContext, value: string | undefined) => Promise<CommandResult>;
 };

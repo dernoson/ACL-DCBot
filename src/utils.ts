@@ -1,9 +1,10 @@
 import { ApplicationCommandOptionType, CacheType, ChatInputCommandInteraction, Client } from 'discord.js';
 import { botEnv } from './config/botSettings';
-import { normalMentionOptions } from './config/optionSettings';
 import { CommandContext, OptionType } from './types';
 
 export const getObjectKeys = <O extends {}>(obj: O) => Object.getOwnPropertyNames(obj) as (keyof O)[];
+
+export const createNoRepeatArr = <T>(operators: T[]) => Array.from(new Set(operators)) as T[];
 
 export const createMutualLock = () => {
     let locker: Promise<void> | undefined;

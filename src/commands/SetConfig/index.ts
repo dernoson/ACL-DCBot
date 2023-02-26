@@ -11,10 +11,10 @@ type Options_SetConfig = {
     value?: OptionType['String'];
 };
 
-const SetConfig: CommandFunction<Options_SetConfig> = async (replier, args) => {
-    if (!botEnv.hasAdminPermission(replier.interaction.member)) return await replier.fail('並非主辦方，無法使用該指令');
+const SetConfig: CommandFunction<Options_SetConfig> = async (ctx, args) => {
+    if (!botEnv.hasAdminPermission(ctx.interaction.member)) return await ctx.fail('並非主辦方，無法使用該指令');
 
-    return await configOptions[args.option].handler(replier, args.value);
+    return await configOptions[args.option].handler(ctx, args.value);
 };
 
 const createConfigOptionMap = <M extends { [key: string]: ConfigOption }>(map: M) => map;
