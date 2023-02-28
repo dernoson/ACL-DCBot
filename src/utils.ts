@@ -26,6 +26,11 @@ export type TimeoutHandler = {
     cancel: () => void;
 };
 
+export const createRestrictObj =
+    <T>() =>
+    <O extends T>(obj: O) =>
+        obj;
+
 export const getCommandOptions = (options: CommandContext['options'], client: Client<true>) => {
     const channelCache = client.channels.cache;
     return options.data.reduce<Partial<{ [key: string]: OptionType[keyof OptionType] | null }>>((prev, { type, name, user, role, value }) => {

@@ -1,7 +1,7 @@
-import { getObjectKeys } from '../utils';
-import { BPEXOption, BPOption, Flow, MatchFlowSetting } from './types';
+import { createRestrictObj, getObjectKeys } from '../utils';
+import { BPEXOption, BPOption, StageSetting, FlowSetting } from './types';
 
-const normalMatchFlow: Flow<BPOption>[] = [
+const normalFlow: StageSetting<BPOption>[] = [
     { option: 'ban', amount: 1 },
     { option: 'ban', amount: 1 },
     { option: 'ban', amount: 1 },
@@ -28,14 +28,14 @@ const normalMatchFlow: Flow<BPOption>[] = [
     { option: 'pick', amount: 1 },
 ];
 
-const testMatchFlow: Flow<BPOption>[] = [
+const testFlow: StageSetting<BPOption>[] = [
     { option: 'ban', amount: 1 },
     { option: 'ban', amount: 1 },
     { option: 'pick', amount: 1 },
     { option: 'pick', amount: 1 },
 ];
 
-const exchangeMatchFlow: Flow<BPEXOption>[] = [
+const exchangeFlow: StageSetting<BPEXOption>[] = [
     { option: 'ban', amount: 1 },
     { option: 'ban', amount: 1 },
     { option: 'ban', amount: 1 },
@@ -64,31 +64,34 @@ const exchangeMatchFlow: Flow<BPEXOption>[] = [
     { option: 'exchange', amount: 1 },
 ];
 
-const createMatchFlowMap = <M extends { [key: string]: MatchFlowSetting }>(map: M) => map;
-
-export const matchFlowMap = createMatchFlowMap({
-    normalMatchFlow: {
+export const flowSettingMap = createRestrictObj<{ [key: string]: FlowSetting }>()({
+    normalFlow: {
         desc: '預設BP流程(單方 Pick: 12, Ban: 5)',
-        flow: normalMatchFlow,
+        content: normalFlow,
     },
-    testMatchFlow: {
+    testFlow: {
         desc: '測試用簡短BP流程(單方 Pick: 1, Ban: 1)',
-        flow: testMatchFlow,
+        content: testFlow,
     },
-    exchangeMatchFlow: {
+    exchangeFlow: {
         desc: '含交換制BP流程(單方 Pick: 13, Ban: 5, Change: 1)',
-        flow: exchangeMatchFlow,
+        content: exchangeFlow,
     },
 });
 
-export const matchFlowMapKeysArr = getObjectKeys(matchFlowMap);
+export type FlowSettingKey = keyof typeof flowSettingMap;
 
-export type MatchFlowKey = keyof typeof matchFlowMap;
+export const flowSettingKeysArr = getObjectKeys(flowSettingMap);
 
-export const defaultMatchFlowKey: MatchFlowKey = 'normalMatchFlow';
+export const defaultFlowSettingKey: FlowSettingKey = 'normalFlow';
 
-export const calcMatchFlowLimit = <F extends Flow, K extends FlowKeyType<F>>(flow: F[], option: K) => {
-    return flow.filter((stage) => option == stage.option).reduce((prev, { amount }) => prev + amount, 0) / 2;
+export const isFlowSettingKey = (key: any): key is FlowSettingKey => flowSettingKeysArr.includes(key);
+
+export const getFlowContent = <K extends FlowSettingKey>(key: K): typeof flowSettingMap[K]['content'] => flowSettingMap[key].content;
+
+export const getFlowDesc = (key: FlowSettingKey) => flowSettingMap[key].desc;
+
+export const calcFlowLimit = (key: FlowSettingKey, option: string) => {
+    const content = getFlowContent(key);
+    return content.filter((stage) => option == stage.option).reduce((prev, { amount }) => prev + amount, 0) / 2;
 };
-
-export type FlowKeyType<F> = F extends Flow<infer T> ? T : never;

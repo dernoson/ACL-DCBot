@@ -1,11 +1,17 @@
-import { BP, Match } from './types';
+import { Match } from './match';
 
 export const matchMap = new Map<string, Match>();
 
-export const banpickMap = new Map<string, BP>();
+export { FlowSetting, StageSetting, StageHeader, BPOption, BPEXOption } from './types';
+export { Match, createMatch, sendMatchChannel, createMatchTimeout, getNowTeam, getNowStageSetting, MatchState, StageHandler } from './match';
 
-export const exchangeMap = new Map<string, [string[], string[]]>();
-
-export { Match, MatchFlowSetting, Flow, BPOption, BPEXOption, MatchState, BP } from './types';
-export { matchFlowMap, matchFlowMapKeysArr, MatchFlowKey, defaultMatchFlowKey, calcMatchFlowLimit, FlowKeyType } from './matchSettings';
-export { createMatch, getDuplicate, getMatchStageDescription, setMatchStageNext, setBPTimeLimit } from './functions';
+export {
+    flowSettingMap,
+    FlowSettingKey,
+    flowSettingKeysArr,
+    defaultFlowSettingKey,
+    isFlowSettingKey,
+    getFlowContent,
+    getFlowDesc,
+    calcFlowLimit,
+} from './flowSettings';
