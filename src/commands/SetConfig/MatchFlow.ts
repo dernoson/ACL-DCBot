@@ -1,23 +1,25 @@
 import { botEnv, dumpSetting } from '../../config/botSettings';
-import { commandSuccessResp } from '../../utils';
+import { defaultMatchMode, MatchMode, matchModeMap } from '../../match';
+import { commandSuccessResp, getObjectKeys } from '../../utils';
 import { ConfigOption } from './types';
 
 export const MatchFlow: ConfigOption = {
     desc: 'BP使用流程',
     handler(ctx, value) {
         if (!value) {
-            botEnv.set('BPTimeLimit', undefined);
+            botEnv.set('MatchFlow', undefined);
             dumpSetting();
-            return commandSuccessResp('[設定機器人環境] BP選角時限秒數：不限');
-        } else if (isNaN(+value)) {
-            throw 'BPTimeLimit 僅可輸入純數字';
-        } else if (+value < 1 || +value > 1000) {
-            throw 'BPTimeLimit 僅可接受 1~1000 的數值';
+            return commandSuccessResp(`[設定機器人環境] BP流程設置：${matchModeMap[defaultMatchMode].desc}`);
+        } else if (isMatchMode(value)) {
+            botEnv.set('MatchFlow', value);
+            dumpSetting();
+            return commandSuccessResp(`[設定機器人環境] BP流程設置：${matchModeMap[value].desc}`);
         } else {
-            const second = +value;
-            botEnv.set('BPTimeLimit', +second);
-            dumpSetting();
-            return commandSuccessResp(`[設定機器人環境] BP選角時限秒數： ${second} 秒`);
+            throw `MatchFlow僅可接受以下字串值：\n${MatchModeArr.map((key) => `\`${key}\` : ${matchModeMap[key].desc}`).join('\n')}`;
         }
     },
 };
+
+const MatchModeArr = getObjectKeys(MatchMode);
+
+const isMatchMode = (value: string): value is MatchMode => MatchModeArr.includes(value as MatchMode);

@@ -1,57 +1,58 @@
 import { GuildMember, Role, TextChannel } from 'discord.js';
 import { botEnv, getAdminMention } from '../config/botSettings';
 import { normalMentionOptions } from '../config/optionSettings';
+import { CommandResult } from '../types';
 import { createTimeoutHandler, TimeoutHandler } from '../utils';
-import { FlowSettingKey, getFlowContent } from './flowSettings';
-import { StageHeader, StageSetting } from './types';
+import { MatchMode, StageHeader, StageSetting } from './types';
 
-export type Match = {
-    channel: TextChannel;
-    teams: [Role, Role];
-    flowSettingKey: FlowSettingKey;
-    stageIndex: number;
-    stageResult: StageHeader[];
-    state: MatchState;
+export class Match {
+    readonly channel: TextChannel;
+    readonly teams: Readonly<[Role, Role]>;
+    readonly matchMode: MatchMode;
+    readonly stageResult: StageHeader[] = [];
+    state = MatchState.prepare;
     timeoutHandler?: TimeoutHandler;
-};
 
-export const createMatch = (channel: TextChannel, teams: [Role, Role], flowSettingKey: FlowSettingKey): Match => ({
-    channel,
-    teams,
-    flowSettingKey,
-    stageIndex: 0,
-    stageResult: [],
-    state: MatchState.prepare,
-});
+    constructor(channel: TextChannel, teams: [Role, Role], matchMode: MatchMode) {
+        this.channel = channel;
+        this.teams = teams;
+        this.matchMode = matchMode;
+    }
 
-export const sendMatchChannel = (match: Match, content: string) => {
-    match.channel.send({ content, allowedMentions: normalMentionOptions });
-};
+    send = (content: string) => this.channel.send({ content, allowedMentions: normalMentionOptions });
 
-export const createMatchTimeout = (match: Match, timeout: number) => {
-    match.timeoutHandler?.cancel();
-    const teamName = getNowTeam(match).name;
-    match.timeoutHandler = createTimeoutHandler(timeout * 1000, () => {
-        match.state = MatchState.pause;
-        sendMatchChannel(match, `選擇角色超時，已暫停BP流程，請 ${getAdminMention()} 進行處理中`);
-        botEnv.log(`> ${teamName} 於 ${match.channel.name} 選角超時。`);
-    });
-};
+    getNowTeam = () => this.teams[+(this.stageResult.length % 2 != 0)];
 
-export const getNowTeam = (match: Match) => match.teams[+(match.stageIndex % 2 != 0)];
+    setStageStart = () => {
+        if (this.state == MatchState.complete || this.state == MatchState.confirm) return null;
+        this.state = MatchState.running;
 
-export const getNowStageSetting = <T extends StageSetting>(match: Match) => (getFlowContent(match.flowSettingKey) as T[]).at(match.stageIndex);
+        const BPTimeLimit = botEnv.get('BPTimeLimit');
+        if (typeof BPTimeLimit == 'number') {
+            this.timeoutHandler?.cancel();
+            const teamName = this.getNowTeam().name;
+            this.timeoutHandler = createTimeoutHandler(BPTimeLimit * 1000, () => {
+                this.state = MatchState.pause;
+                this.send(`選擇角色超時，已暫停流程，請 ${getAdminMention()} 進行處理中`);
+                botEnv.log(`> ${teamName} 於 ${this.channel.name} 選角超時。`);
+            });
+            return { timeLimit: BPTimeLimit };
+        }
+        return {};
+    };
+}
 
 export const enum MatchState {
     prepare = '準備中',
     running = '進行中',
     pause = '暫停',
     complete = '待確認',
-    fixed = '已確認',
+    confirm = '已確認',
 }
 
-export type StageHandler<O extends string = string> = {
-    onStart: (stage: StageSetting<O>, match: Match) => string;
-    onSelect: (stage: StageSetting<O>, operatorList: string[], match: Match, member: GuildMember) => string;
-    onRemove: (match: Match) => string;
+export type ModeSetting = {
+    desc: string;
+    flow: StageSetting[];
+    logTotal: (match: Match) => string;
+    onSelect: (match: Match, operatorList: string[], member: GuildMember) => CommandResult;
 };

@@ -1,6 +1,5 @@
 import { SlashCommandBuilder, TextChannel } from 'discord.js';
-import { Match, matchMap } from '../match';
-import { getMatchStageDescription, getNowFlow, getNowTeam } from '../match/functions';
+import { Match, matchMap, matchModeMap } from '../match';
 import { CommandFunction, OptionType } from '../types';
 import { checkAdminPermission } from '../utils';
 
@@ -25,12 +24,12 @@ const LogMatch: CommandFunction<Options_LogMatch> = (ctx, { channel }) => {
 
 const genMatchString = (match: Match) => {
     const [teamA, teamB] = match.teams;
-    const nowTeam = getNowTeam(match);
-    const nowFlow = getNowFlow(match);
+    const nowTeam = match.getNowTeam();
+    const stageSetting = matchModeMap[match.matchMode].flow[match.stageResult.length];
     return `
-**${match.channel.name}: ${teamA.teamRole.name} vs ${teamB.teamRole.name}**
-狀態：${match.state} / ${nowFlow ? nowTeam.teamRole.name + ' ' + nowFlow.option + ' ' + nowFlow.amount : '無'}
-${getMatchStageDescription(match)}
+**${match.channel.name}: ${teamA.name} vs ${teamB.name}**
+狀態：${match.state} / ${stageSetting ? nowTeam.name + ' ' + stageSetting.option + ' ' + stageSetting.amount : '無'}
+${matchModeMap[match.matchMode].logTotal(match)}
 `;
 };
 

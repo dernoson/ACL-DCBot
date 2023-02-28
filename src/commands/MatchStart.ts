@@ -1,8 +1,8 @@
 import { ChannelType, roleMention, SlashCommandBuilder, TextChannel } from 'discord.js';
-import { CommandFunction, CommandResult, OptionType } from '../types';
-import { matchMap, MatchState, Match, sendMatchChannel, createMatchTimeout, getNowStageSetting, StageSetting, getNowTeam } from '../match';
-import { checkAdminPermission, commandSuccessResp, createRestrictObj } from '../utils';
-import { botEnv } from '../config/botSettings';
+import { CommandFunction, OptionType } from '../types';
+import { matchMap, MatchState, Match, matchModeMap, isBPStageSetting } from '../match';
+import { checkAdminPermission, commandSuccessResp } from '../utils';
+import { logStartBPStage } from '../match/bp';
 
 type Options_MatchStart = {
     channel?: OptionType['Channel'];
@@ -28,38 +28,22 @@ const MatchStart: CommandFunction<Options_MatchStart> = (ctx, { channel, all }) 
 
 function setMatchStart(match: Match) {
     const lastState = match.state;
-    const nowStageSetting = getNowStageSetting(match)!;
-    if ((lastState != MatchState.prepare && lastState != MatchState.pause) || !nowStageSetting) return false;
-    match.state = MatchState.running;
-    const [teamA, teamB] = match.teams;
+    const startStageResult = match.setStageStart();
+    if (!startStageResult) return false;
 
-    const versusDesp = `===  ${roleMention(teamA.id)} vs ${roleMention(teamB.id)} ===\n`;
+    const modeSetting = matchModeMap[match.matchMode];
+    const nextStageSetting = modeSetting.flow[match.stageResult.length];
+    const timeLimitDesc = startStageResult.timeLimit ? `限時 ${startStageResult.timeLimit} 秒。` : '不限時間。';
 
-    const nextDesp = stageStartHandlers[nowStageSetting.option](match, nowStageSetting);
+    let nextDesc = '';
+    if (isBPStageSetting(nextStageSetting)) nextDesc = logStartBPStage(match.getNowTeam(), nextStageSetting);
+    else throw 'unknown StageSetting';
 
-    const result = lastState == MatchState.prepare ? versusDesp + nextDesp : nextDesp;
-
-    const BPTimeLimit = botEnv.get('BPTimeLimit');
-    if (typeof BPTimeLimit == 'number') {
-        createMatchTimeout(match, BPTimeLimit);
-        sendMatchChannel(match, result + `限時 ${BPTimeLimit} 秒。`);
-    }
-    sendMatchChannel(match, result);
+    const versusDesc = `===  ${roleMention(match.teams[0].id)} vs ${roleMention(match.teams[1].id)} ===\n`;
+    match.send(lastState == MatchState.prepare ? versusDesc + nextDesc + timeLimitDesc : nextDesc + timeLimitDesc);
 
     return true;
 }
-
-const BPStageStartHandler: StageStartHandler = (match, stageSetting) => {
-    const teamRole = getNowTeam(match);
-    return `請 ${roleMention(teamRole.id)} 選擇要 ${stageSetting.option} 的 ${stageSetting.amount} 位幹員。`;
-};
-
-type StageStartHandler = (match: Match, stageSetting: StageSetting) => CommandResult;
-
-const stageStartHandlers = createRestrictObj<{ [key: string]: StageStartHandler }>()({
-    ban: BPStageStartHandler,
-    pick: BPStageStartHandler,
-});
 
 export default {
     func: MatchStart,

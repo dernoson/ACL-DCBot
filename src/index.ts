@@ -70,11 +70,10 @@ client.on('interactionCreate', async (interaction) => {
         log && logCommandResult(commandName, 'success', username, log);
         await interaction.reply({ content, ephemeral: typeof result != 'string' && result.ephemeral, allowedMentions: normalMentionOptions });
     } catch (error) {
-        if (typeof error == 'string') logCommandResult(commandName, 'fail', username, error);
-        else {
-            logCommandResult(commandName, 'fail', username, '未知錯誤');
-            console.log(error);
-        }
+        const errorLog = typeof error == 'string' ? error : '未知錯誤';
+        logCommandResult(commandName, 'fail', username, errorLog);
+        await interaction.reply({ content: errorLog, ephemeral: true });
+        if (typeof error != 'string') console.log(error);
     }
 });
 
