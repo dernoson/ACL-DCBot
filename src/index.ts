@@ -71,9 +71,9 @@ client.on('interactionCreate', async (interaction) => {
         await interaction.reply({ content, ephemeral: typeof result != 'string' && result.ephemeral, allowedMentions: normalMentionOptions });
     } catch (error) {
         const errorLog = typeof error == 'string' ? error : '未知錯誤';
+        if (typeof error != 'string') console.log(error);
         logCommandResult(commandName, 'fail', username, errorLog);
         await interaction.reply({ content: errorLog, ephemeral: true });
-        if (typeof error != 'string') console.log(error);
     }
 });
 

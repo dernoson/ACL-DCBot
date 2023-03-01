@@ -1,6 +1,5 @@
 import { SlashCommandBuilder, TextChannel } from 'discord.js';
-import { matchMap, MatchState } from '../match';
-import { isBPStageResult, logRemoveBPStage } from '../match';
+import { matchMap, matchModeMap, MatchState } from '../match';
 import { CommandFunction } from '../types';
 import { checkAdminPermission, commandSuccessResp } from '../utils';
 
@@ -15,12 +14,7 @@ const MatchLaststep: CommandFunction = (ctx) => {
 
     match.state = MatchState.pause;
     match.timeoutHandler?.cancel();
-    const nowTeam = match.getNowTeam();
-    const removedStage = match.stageResult.pop();
-    if (!removedStage) throw '頻道BP流程已無法再往前回復了';
-
-    if (isBPStageResult(removedStage)) return commandSuccessResp(logRemoveBPStage(nowTeam, removedStage));
-    throw 'unknown StageResult';
+    return commandSuccessResp(matchModeMap[match.matchMode].onRemove(match));
 };
 
 export default {

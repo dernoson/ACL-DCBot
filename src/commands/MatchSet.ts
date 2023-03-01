@@ -16,8 +16,9 @@ const MatchSet: CommandFunction<Options_MatchSet> = (ctx, { channel, team1, team
 
     if (!(channel instanceof TextChannel)) throw '指定頻道非純文字頻道';
     if (!(team1 instanceof Role) || !(team2 instanceof Role)) throw '指定身分組不符需求';
-    if (!force && matchMap.has(channel.id))
-        throw '該頻道尚留存比賽分組指定，可使用match_clear指令先清除該頻道舊有指定，或是在該指令附加 { force: true } 選項';
+    const oldMatch = matchMap.get(channel.id);
+    if (!force && oldMatch) throw '該頻道尚留存比賽分組指定，可使用match_clear指令先清除該頻道舊有指定，或是在該指令附加 { force: true } 選項';
+    if (oldMatch) oldMatch.timeoutHandler?.cancel();
 
     const matchMode = (botEnv.get('MatchFlow') as MatchMode) || defaultMatchMode;
     matchMap.set(channel.id, new Match(channel, [team1, team2], matchMode));

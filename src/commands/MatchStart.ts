@@ -2,7 +2,6 @@ import { ChannelType, roleMention, SlashCommandBuilder, TextChannel } from 'disc
 import { CommandFunction, OptionType } from '../types';
 import { matchMap, MatchState, Match, matchModeMap, isBPStageSetting } from '../match';
 import { checkAdminPermission, commandSuccessResp } from '../utils';
-import { logStartBPStage } from '../match/bp';
 
 type Options_MatchStart = {
     channel?: OptionType['Channel'];
@@ -32,15 +31,11 @@ function setMatchStart(match: Match) {
     if (!startStageResult) return false;
 
     const modeSetting = matchModeMap[match.matchMode];
-    const nextStageSetting = modeSetting.flow[match.stageResult.length];
     const timeLimitDesc = startStageResult.timeLimit ? `限時 ${startStageResult.timeLimit} 秒。` : '不限時間。';
-
-    let nextDesc = '';
-    if (isBPStageSetting(nextStageSetting)) nextDesc = logStartBPStage(match.getNowTeam(), nextStageSetting);
-    else throw 'unknown StageSetting';
+    const result = modeSetting.logTotal(match) + modeSetting.logStart(match) + timeLimitDesc;
 
     const versusDesc = `===  ${roleMention(match.teams[0].id)} vs ${roleMention(match.teams[1].id)} ===\n`;
-    match.send(lastState == MatchState.prepare ? versusDesc + nextDesc + timeLimitDesc : nextDesc + timeLimitDesc);
+    match.send(lastState == MatchState.prepare ? versusDesc + result : result);
 
     return true;
 }

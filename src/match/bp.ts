@@ -29,6 +29,17 @@ export const BP_logTotal = (flow: StageSetting<BPOption>[], match: Match) => {
     return result;
 };
 
+export const BP_logStart = (flow: StageSetting<BPOption>[], match: Match) => {
+    const stageSetting = flow[match.stageResult.length];
+    return `請 ${roleMention(match.getNowTeam().id)} 選擇要 ${stageSetting.option} 的 ${stageSetting.amount} 位幹員。`;
+};
+
+export const BP_onRemove = (match: Match) => {
+    const removedStage = (match.stageResult as BPStageResult[]).pop();
+    if (!removedStage) throw '頻道BP流程已無法再往前回復了';
+    return `已移除 ${match.getNowTeam().name} ${removedStage.option} 的 \`${removedStage.operators.join(' ')}\``;
+};
+
 export const BP_onSelect = (flow: StageSetting<BPOption>[], match: Match, operatorList: string[], member: GuildMember) => {
     const stageSetting = flow[match.stageResult.length];
     const nowTeam = match.getNowTeam();
@@ -50,21 +61,15 @@ export const BP_onSelect = (flow: StageSetting<BPOption>[], match: Match, operat
     const stageLog = BP_logTotal(flow, match);
 
     const idx = match.stageResult.length;
-    if (idx >= flow.length) match.state = MatchState.complete;
+    if (idx >= flow.length) {
+        match.state = MatchState.complete;
+        match.timeoutHandler?.cancel();
+    }
 
     const startStageResult = match.setStageStart();
     if (!startStageResult) return selectResult + '\n' + stageLog + '\n' + `流程已結束，請 ${getAdminMention()} 進行最後確認`;
     const timeLimitDesc = startStageResult.timeLimit ? `限時 ${startStageResult.timeLimit} 秒。` : '不限時間。';
-    //TODO 決定下一步該用什麼解讀器
-    return selectResult + '\n' + stageLog + '\n' + logStartBPStage(match.getNowTeam(), flow[idx]) + timeLimitDesc;
-};
-
-export const logStartBPStage = (team: Role, stage: StageSetting<BPOption>) => {
-    return `請 ${roleMention(team.id)} 選擇要 ${stage.option} 的 ${stage.amount} 位幹員。`;
-};
-
-export const logRemoveBPStage = (team: Role, stage: BPStageResult) => {
-    return `已移除 ${team.name} ${stage.option} 的 \`${stage.operators.join(' ')}\``;
+    return selectResult + '\n' + stageLog + '\n' + BP_logStart(flow, match) + timeLimitDesc;
 };
 
 const getBPList = (stageResult: Match['stageResult']) => {
@@ -83,6 +88,10 @@ const getBPList = (stageResult: Match['stageResult']) => {
 
 export const createLogTotal_ModeBP = (flow: StageSetting<BPOption>[]): ModeSetting['logTotal'] => {
     return (...params) => BP_logTotal(flow, ...params);
+};
+
+export const createLogStart_ModeBP = (flow: StageSetting<BPOption>[]): ModeSetting['logStart'] => {
+    return (...params) => BP_logStart(flow, ...params);
 };
 
 export const createOnSelect_ModeBP = (flow: StageSetting<BPOption>[]): ModeSetting['onSelect'] => {
