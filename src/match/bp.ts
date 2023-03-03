@@ -1,4 +1,4 @@
-import { GuildMember, Role, roleMention } from 'discord.js';
+import { GuildMember, roleMention } from 'discord.js';
 import { getAdminMention } from '../config/botSettings';
 import { Match, MatchState, ModeSetting } from './match';
 import { BPOption, StageSetting, calcFlowTotal, BPStageResult, isBPStageResult } from './types';
@@ -29,7 +29,7 @@ export const BP_logTotal = (flow: StageSetting<BPOption>[], match: Match) => {
     return result;
 };
 
-export const BP_logStart = (flow: StageSetting<BPOption>[], match: Match) => {
+export const BP_onStart = (flow: StageSetting<BPOption>[], match: Match) => {
     const stageSetting = flow[match.stageResult.length];
     return `請 ${roleMention(match.getNowTeam().id)} 選擇要 ${stageSetting.option} 的 ${stageSetting.amount} 位幹員。`;
 };
@@ -69,7 +69,7 @@ export const BP_onSelect = (flow: StageSetting<BPOption>[], match: Match, operat
     const startStageResult = match.setStageStart();
     if (!startStageResult) return selectResult + '\n' + stageLog + '\n' + `流程已結束，請 ${getAdminMention()} 進行最後確認`;
     const timeLimitDesc = startStageResult.timeLimit ? `限時 ${startStageResult.timeLimit} 秒。` : '不限時間。';
-    return selectResult + '\n' + stageLog + '\n' + BP_logStart(flow, match) + timeLimitDesc;
+    return selectResult + '\n' + stageLog + '\n' + BP_onStart(flow, match) + timeLimitDesc;
 };
 
 const getBPList = (stageResult: Match['stageResult']) => {
@@ -90,8 +90,8 @@ export const createLogTotal_ModeBP = (flow: StageSetting<BPOption>[]): ModeSetti
     return (...params) => BP_logTotal(flow, ...params);
 };
 
-export const createLogStart_ModeBP = (flow: StageSetting<BPOption>[]): ModeSetting['logStart'] => {
-    return (...params) => BP_logStart(flow, ...params);
+export const createOnStart_ModeBP = (flow: StageSetting<BPOption>[]): ModeSetting['onStart'] => {
+    return (...params) => BP_onStart(flow, ...params);
 };
 
 export const createOnSelect_ModeBP = (flow: StageSetting<BPOption>[]): ModeSetting['onSelect'] => {

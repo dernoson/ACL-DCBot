@@ -62,3 +62,13 @@ export const exchangeFlow: StageSetting<BPEXOption>[] = [
     { option: 'pick', amount: 1 },
     { option: 'exchange', amount: 1 },
 ];
+
+export const testExchangeFlow: StageSetting<BPEXOption>[] = [
+    { option: 'ban', amount: 1 },
+    { option: 'ban', amount: 1 },
+    { option: 'pick', amount: 1 },
+    { option: 'pick', amount: 1 },
+    { option: 'exchange', amount: 1 },
+    { option: 'pick', amount: 1 },
+    { option: 'pick', amount: 1 },
+];

@@ -32,7 +32,7 @@ function setMatchStart(match: Match) {
 
     const modeSetting = matchModeMap[match.matchMode];
     const timeLimitDesc = startStageResult.timeLimit ? `限時 ${startStageResult.timeLimit} 秒。` : '不限時間。';
-    const result = modeSetting.logTotal(match) + modeSetting.logStart(match) + timeLimitDesc;
+    const result = modeSetting.logTotal(match) + modeSetting.onStart(match) + timeLimitDesc;
 
     const versusDesc = `===  ${roleMention(match.teams[0].id)} vs ${roleMention(match.teams[1].id)} ===\n`;
     match.send(lastState == MatchState.prepare ? versusDesc + result : result);

@@ -14,7 +14,7 @@ const MatchConfirm: CommandFunction = (ctx) => {
     if (match.state != MatchState.complete) throw '頻道BP流程尚未處於可確認狀態';
 
     match.state = MatchState.confirm;
-    const result = commandSuccessResp(`已確認 ${match.channel.name} 的BP流程`);
+    const result = `已確認 ${match.channel.name} 的BP流程`;
     if (!botEnv.logChannel) return result;
 
     const [teamA, teamB] = match.teams;

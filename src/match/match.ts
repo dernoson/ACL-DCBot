@@ -54,7 +54,7 @@ export type ModeSetting = {
     desc: string;
     flow: StageSetting[];
     logTotal: (match: Match) => string;
-    logStart: (match: Match) => string;
+    onStart: (match: Match) => string;
     onRemove: (match: Match) => string;
     onSelect: (match: Match, operatorList: string[], member: GuildMember) => CommandResult;
 };
