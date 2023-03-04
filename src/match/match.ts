@@ -19,35 +19,43 @@ export class Match {
         this.matchMode = matchMode;
     }
 
-    send = (content: string) => this.channel.send({ content, allowedMentions: normalMentionOptions });
+    send(content: string) {
+        return this.channel.send({ content, allowedMentions: normalMentionOptions });
+    }
 
-    getNowTeam = () => this.teams[+(this.stageResult.length % 2 != 0)];
+    getNowTeam() {
+        return this.teams[+(this.stageResult.length % 2 != 0)];
+    }
 
-    setStageStart = () => {
-        if (this.state == MatchState.complete || this.state == MatchState.confirm) return null;
+    setPause() {
+        if (this.state != MatchState.running) return;
+        this.state = MatchState.pause;
+        this.timeoutHandler?.cancel();
+    }
+
+    setStart(flow: StageHeader[]) {
+        if (this.stageResult.length >= flow.length && this.state != MatchState.confirm) this.state = MatchState.complete;
+        if (this.state != MatchState.pause && this.state != MatchState.prepare) return;
         this.state = MatchState.running;
-
         const BPTimeLimit = botEnv.get('BPTimeLimit');
-        if (typeof BPTimeLimit == 'number') {
-            this.timeoutHandler?.cancel();
-            const teamName = this.getNowTeam().name;
-            this.timeoutHandler = createTimeoutHandler(BPTimeLimit * 1000, () => {
-                this.state = MatchState.pause;
-                this.send(`選擇角色超時，已暫停流程，請 ${getAdminMention()} 進行處理中`);
-                botEnv.log(`> ${teamName} 於 ${this.channel.name} 選角超時。`);
-            });
-            return { timeLimit: BPTimeLimit };
-        }
-        return {};
-    };
+        if (typeof BPTimeLimit != 'number') return '不限時間。';
+
+        const teamName = this.getNowTeam().name;
+        this.timeoutHandler = createTimeoutHandler(BPTimeLimit * 1000, () => {
+            this.setPause();
+            this.send(`選擇角色超時，已暫停流程，請 ${getAdminMention()} 進行處理中`);
+            botEnv.log(`> ${teamName} 於 ${this.channel.name} 選角超時。`);
+        });
+        return `限時 ${BPTimeLimit} 秒。`;
+    }
 }
 
 export const enum MatchState {
-    prepare = '準備中',
-    running = '進行中',
-    pause = '暫停',
-    complete = '待確認',
-    confirm = '已確認',
+    prepare,
+    running,
+    pause,
+    complete,
+    confirm,
 }
 
 export type ModeSetting = {

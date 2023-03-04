@@ -1,5 +1,5 @@
 import { ChannelType, SlashCommandBuilder, TextChannel } from 'discord.js';
-import { matchMap } from '../match';
+import { Match, matchMap, matchModeMap } from '../match';
 import { CommandFunction, OptionType } from '../types';
 import { checkAdminPermission, commandSuccessResp } from '../utils';
 
@@ -14,7 +14,7 @@ const MatchClear: CommandFunction<Options_MatchStart> = (ctx, { channel, all }) 
         const clearedMatchName: string[] = [];
         matchMap.forEach((match) => {
             clearedMatchName.push(match.channel.name);
-            match.timeoutHandler?.cancel();
+            clearMatchContent(match);
         });
         matchMap.clear();
         return commandSuccessResp(
@@ -26,10 +26,16 @@ const MatchClear: CommandFunction<Options_MatchStart> = (ctx, { channel, all }) 
         const match = matchMap.get(targetChannel.id);
         if (!match) throw '指定頻道非BP使用頻道';
 
-        matchMap.delete(targetChannel.id);
-        match.timeoutHandler?.cancel();
+        clearMatchContent(match);
         return commandSuccessResp(`已清除 ${match.channel.name} 的BP流程`);
     }
+};
+
+export const clearMatchContent = (match: Match) => {
+    match.setPause();
+    const modeSetting = matchModeMap[match.matchMode];
+    for (let i = 0; i < match.stageResult.length; i++) modeSetting.onRemove(match);
+    matchMap.delete(match.channel.id);
 };
 
 export default {

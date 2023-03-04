@@ -1,4 +1,4 @@
-import { Client, REST, Routes } from 'discord.js';
+import { Client, Message, REST, Routes } from 'discord.js';
 import { BotToken, BotClientID } from './secret/tokens';
 import { CommandExport } from './types';
 import { getCommandOptions, logCommandResult } from './utils';
@@ -54,6 +54,10 @@ const client = new Client({ intents: IntentOptions });
 client.on('ready', (client) => {
     console.log(`Logged in as ${client.user.tag}!`);
     botEnv.onBotReady(client);
+});
+
+client.on('messageCreate', (message: Message) => {
+    if (!message.inGuild()) return;
 });
 
 client.on('interactionCreate', async (interaction) => {

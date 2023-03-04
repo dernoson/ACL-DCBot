@@ -2,7 +2,7 @@ import { SlashCommandBuilder, TextChannel, EmbedBuilder } from 'discord.js';
 import { botEnv } from '../config/botSettings';
 import { matchMap, matchModeMap, MatchState } from '../match';
 import { CommandFunction } from '../types';
-import { checkAdminPermission, commandSuccessResp } from '../utils';
+import { checkAdminPermission } from '../utils';
 
 const MatchConfirm: CommandFunction = (ctx) => {
     checkAdminPermission(ctx);

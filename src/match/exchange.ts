@@ -2,7 +2,7 @@ import { GuildMember } from 'discord.js';
 import { getAdminMention } from '../config/botSettings';
 import { CommandResult } from '../types';
 import { BP_onStart, BP_onRemove, BP_onSelect } from './bp';
-import { Match, MatchState, ModeSetting } from './match';
+import { Match, ModeSetting } from './match';
 import { BPEXOption, calcFlowTotal, StageSetting, isBPEXStageResult, BPEXStageResult, BPOption, isBPStageResult } from './types';
 
 const exchangeRegMap = new Map<string, [string[], string[]]>();
@@ -35,7 +35,7 @@ export const BPEX_logTotal = (flow: StageSetting<BPEXOption>[], match: Match) =>
     if (team_1_Desp) result += `${result ? '\n' : ''}《${teamBName}》\`\`\`${team_1_Desp}\`\`\``;
     if (bpex.exchange) {
         result += `${result ? '\n' : ''}交換幹員 (${bpex.exchange[0].length}/${exchangeLimit})`;
-        result += `\`\`\`《${teamAName}》${bpex.exchange[0].join(' ')}\n⇅\n《${teamBName}》${bpex.exchange[1].join(' ')}\`\`\``;
+        result += `\`\`\`《${teamAName}》${bpex.exchange[1].join(' ')}\n⇅\n《${teamBName}》${bpex.exchange[0].join(' ')}\`\`\``;
     }
     return result;
 };
@@ -45,7 +45,7 @@ export const BPEX_onStart = (flow: StageSetting<BPEXOption>[], match: Match) => 
     const stageSetting = flow[idx];
     if (stageSetting.option == 'exchange') {
         exchangeRegMap.set(match.channel.id + '#' + idx, [[], []]);
-        return `請雙方各自選擇要 交換 的 ${stageSetting.amount} 位幹員，該階段會在兩方都選擇完畢後，才會公布選擇內容。`;
+        return `請雙方各自選擇要交換的 ${stageSetting.amount} 位幹員，該階段會在兩方都選擇完畢後，才會公布選擇內容。`;
     }
     return BP_onStart(flow as StageSetting<BPOption>[], match);
 };
@@ -61,21 +61,22 @@ export const BPEX_onRemove = (match: Match) => {
         const teamBName = match.teams[1].name;
         return (
             '已移除交換幹員：\n' +
-            `《${teamAName}》${removedStage.operators[0].join(' ')}\n⇅\n《${teamBName}》${removedStage.operators[1].join(' ')}`
+            `《${teamAName}》${removedStage.operators[1].join(' ')}\n⇅\n《${teamBName}》${removedStage.operators[0].join(' ')}`
         );
     }
     return BP_onRemove(match);
 };
 
 export const BPEX_onSelect = (flow: StageSetting<BPEXOption>[], match: Match, operatorList: string[], member: GuildMember): CommandResult => {
-    let nowIdx = match.stageResult.length;
-    const stageSetting = flow[nowIdx];
+    const stageSetting = flow[match.stageResult.length];
+    const exchangeRegID = match.channel.id + '#' + match.stageResult.length;
     const nowTeam = match.getNowTeam();
     const { option } = stageSetting;
     const bpex = getBPEXList(match.stageResult);
-    const exchangeReg = exchangeRegMap.get(match.channel.id + '#' + nowIdx)!;
+    const exchangeReg = exchangeRegMap.get(exchangeRegID);
 
     if (option == 'exchange') {
+        if (!exchangeReg) throw 'cannot find exchangeReg';
         const validTeamA = !exchangeReg[0].length && member.roles.cache.some((role) => role.id == match.teams[0].id);
         const validTeamB = !exchangeReg[1].length && member.roles.cache.some((role) => role.id == match.teams[1].id);
         if (!validTeamA && !validTeamB) throw '當前頻道內你並無使用/select指令的權限';
@@ -88,30 +89,24 @@ export const BPEX_onSelect = (flow: StageSetting<BPEXOption>[], match: Match, op
             if (operatorList.some((op) => !bpex.pick[0].includes(op))) throw '部分選擇的幹員沒有在對方的pick列表，請重新選擇';
             exchangeReg[1].push(...operatorList);
         }
-        if (exchangeReg[0].length && exchangeReg[1].length) {
-            const stageResult: BPEXStageResult = { option: 'exchange', operators: exchangeReg };
-            match.stageResult.push(stageResult);
-            const idx = match.stageResult.length;
-            if (idx >= flow.length) {
-                match.state = MatchState.complete;
-                match.timeoutHandler?.cancel();
-            }
-            exchangeRegMap.delete(match.channel.id + '#' + idx);
-        } else {
+        if (!exchangeReg[0].length || !exchangeReg[1].length) {
             return {
                 content: `你已選擇交換 \`${operatorList.join(' ')}\`，等待對方完成選擇。\n你的選擇會在兩方都完成選擇後才會公布。`,
                 ephemeral: true,
             };
         }
+        match.setPause();
+        const stageResult: BPEXStageResult = { option: 'exchange', operators: exchangeReg };
+        match.stageResult.push(stageResult);
+        exchangeRegMap.delete(exchangeRegID);
     } else {
         BP_onSelect(flow as StageSetting<BPOption>[], match, operatorList, member);
     }
-    nowIdx = match.stageResult.length;
+
     const selectResult = option == 'exchange' ? '' : `${nowTeam.name} 選擇了 \`${operatorList.join(' ')}\`\n`;
     const stageLog = BPEX_logTotal(flow, match);
-    const startStageResult = match.setStageStart();
-    if (!startStageResult) return selectResult + '\n' + stageLog + '\n' + `流程已結束，請 ${getAdminMention()} 進行最後確認`;
-    const timeLimitDesc = startStageResult.timeLimit ? `限時 ${startStageResult.timeLimit} 秒。` : '不限時間。';
+    const timeLimitDesc = match.setStart(flow);
+    if (!timeLimitDesc) return selectResult + '\n' + stageLog + '\n' + `流程已結束，請 ${getAdminMention()} 進行最後確認`;
     return selectResult + '\n' + stageLog + '\n' + BPEX_onStart(flow, match) + timeLimitDesc;
 };
 

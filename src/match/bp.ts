@@ -1,6 +1,6 @@
 import { GuildMember, roleMention } from 'discord.js';
 import { getAdminMention } from '../config/botSettings';
-import { Match, MatchState, ModeSetting } from './match';
+import { Match, ModeSetting } from './match';
 import { BPOption, StageSetting, calcFlowTotal, BPStageResult, isBPStageResult } from './types';
 
 export const BP_logTotal = (flow: StageSetting<BPOption>[], match: Match) => {
@@ -54,21 +54,16 @@ export const BP_onSelect = (flow: StageSetting<BPOption>[], match: Match, operat
     }, []);
     if (operatorList.some((operator) => selected.includes(operator))) throw '部分選擇的幹員已被選擇過，請重新選擇';
 
+    match.setPause();
+
     const selectResult = `${nowTeam.name} 選擇了 \`${operatorList.join(' ')}\`\n`;
 
-    const stageResult: BPStageResult = { option: stageSetting.option, operators: operatorList };
-    match.stageResult.push(stageResult);
+    const result: BPStageResult = { option: stageSetting.option, operators: operatorList };
+    match.stageResult.push(result);
     const stageLog = BP_logTotal(flow, match);
 
-    const idx = match.stageResult.length;
-    if (idx >= flow.length) {
-        match.state = MatchState.complete;
-        match.timeoutHandler?.cancel();
-    }
-
-    const startStageResult = match.setStageStart();
-    if (!startStageResult) return selectResult + '\n' + stageLog + '\n' + `流程已結束，請 ${getAdminMention()} 進行最後確認`;
-    const timeLimitDesc = startStageResult.timeLimit ? `限時 ${startStageResult.timeLimit} 秒。` : '不限時間。';
+    const timeLimitDesc = match.setStart(flow);
+    if (!timeLimitDesc) return selectResult + '\n' + stageLog + '\n' + `流程已結束，請 ${getAdminMention()} 進行最後確認`;
     return selectResult + '\n' + stageLog + '\n' + BP_onStart(flow, match) + timeLimitDesc;
 };
 

@@ -3,6 +3,7 @@ import { botEnv } from '../config/botSettings';
 import type { CommandFunction, OptionType } from '../types';
 import { Match, defaultMatchMode, matchMap, MatchMode, matchModeMap } from '../match';
 import { checkAdminPermission, commandSuccessResp } from '../utils';
+import { clearMatchContent } from './MatchClear';
 
 type Options_MatchSet = {
     channel: OptionType['Channel'];
@@ -18,7 +19,8 @@ const MatchSet: CommandFunction<Options_MatchSet> = (ctx, { channel, team1, team
     if (!(team1 instanceof Role) || !(team2 instanceof Role)) throw '指定身分組不符需求';
     const oldMatch = matchMap.get(channel.id);
     if (!force && oldMatch) throw '該頻道尚留存比賽分組指定，可使用match_clear指令先清除該頻道舊有指定，或是在該指令附加 { force: true } 選項';
-    if (oldMatch) oldMatch.timeoutHandler?.cancel();
+
+    if (oldMatch) clearMatchContent(oldMatch);
 
     const matchMode = (botEnv.get('MatchFlow') as MatchMode) || defaultMatchMode;
     matchMap.set(channel.id, new Match(channel, [team1, team2], matchMode));

@@ -1,18 +1,19 @@
 import { ChannelType, roleMention, SlashCommandBuilder, TextChannel } from 'discord.js';
 import { CommandFunction, OptionType } from '../types';
-import { matchMap, MatchState, Match, matchModeMap, isBPStageSetting } from '../match';
-import { checkAdminPermission, commandSuccessResp } from '../utils';
+import { matchMap, MatchState, Match, matchModeMap } from '../match';
+import { checkAdminPermission, commandSuccessResp, createTimeoutHandler } from '../utils';
 
 type Options_MatchStart = {
     channel?: OptionType['Channel'];
     all?: OptionType['Boolean'];
+    force?: OptionType['Boolean'];
 };
 
-const MatchStart: CommandFunction<Options_MatchStart> = (ctx, { channel, all }) => {
+const MatchStart: CommandFunction<Options_MatchStart> = (ctx, { channel, all, force }) => {
     checkAdminPermission(ctx);
     if (all) {
         const startedMatchName: string[] = [];
-        matchMap.forEach((match) => setMatchStart(match) && startedMatchName.push(match.channel.name));
+        matchMap.forEach((match) => setMatchStart(match, force) && startedMatchName.push(match.channel.name));
         const result = startedMatchName.length ? `已啟動以下頻道的BP流程：\n${startedMatchName.join('\n')}` : '未啟動任何頻道的BP流程';
         return commandSuccessResp(result);
     } else {
@@ -20,25 +21,35 @@ const MatchStart: CommandFunction<Options_MatchStart> = (ctx, { channel, all }) 
         if (!(targetChannel instanceof TextChannel)) throw '指定頻道非純文字頻道';
         const match = matchMap.get(targetChannel.id);
         if (!match) throw '指定頻道非BP使用頻道';
-        if (!setMatchStart(match)) throw '該頻道BP流程無法啟動';
+        if (!setMatchStart(match, force)) throw '該頻道BP流程無法啟動';
         return commandSuccessResp(`已啟動 ${match.channel.name} 的BP流程`);
     }
 };
 
-function setMatchStart(match: Match) {
+const setMatchStart = (match: Match, force?: boolean) => {
     const lastState = match.state;
-    const startStageResult = match.setStageStart();
-    if (!startStageResult) return false;
-
     const modeSetting = matchModeMap[match.matchMode];
-    const timeLimitDesc = startStageResult.timeLimit ? `限時 ${startStageResult.timeLimit} 秒。` : '不限時間。';
-    const result = modeSetting.logTotal(match) + modeSetting.onStart(match) + timeLimitDesc;
+    const timeLimitDesc = match.setStart(modeSetting.flow);
+    if (!timeLimitDesc) return false;
 
-    const versusDesc = `===  ${roleMention(match.teams[0].id)} vs ${roleMention(match.teams[1].id)} ===\n`;
-    match.send(lastState == MatchState.prepare ? versusDesc + result : result);
+    const result = modeSetting.logTotal(match) + modeSetting.onStart(match) + timeLimitDesc;
+    const beforeStartDesc =
+        `**===  ${roleMention(match.teams[0].id)} vs ${roleMention(match.teams[1].id)} ===**\n` +
+        `此次使用的選角流程為 \`${modeSetting.desc}\`\n` +
+        `途中遇到問題，都可以tag主辦方或管理員進行處理。\n\n`;
+    if (lastState == MatchState.prepare && !force) {
+        match.send(beforeStartDesc + '選角流程將於 3 分鐘後開始，請主辦方與參賽方做好準備。');
+        match.timeoutHandler = createTimeoutHandler(180 * 1000, () => {
+            match.send(result);
+        });
+    } else if (lastState == MatchState.pause) {
+        match.send(result);
+    } else if (lastState == MatchState.prepare) {
+        match.send(beforeStartDesc + result);
+    }
 
     return true;
-}
+};
 
 export default {
     func: MatchStart,
@@ -53,5 +64,6 @@ export default {
         )
         .addBooleanOption((option) =>
             option.setName('all').setDescription('選填該選項為True時，無視channel指定，將所有狀態為未開始、暫停中的BP頻道設為開始狀態')
-        ),
+        )
+        .addBooleanOption((option) => option.setName('force').setDescription('選填該選項為True時，所有指定的頻道都會強制開始流程，不會等待')),
 };

@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, TextChannel } from 'discord.js';
-import { Match, matchMap, matchModeMap } from '../match';
+import { Match, matchMap, matchModeMap, MatchState } from '../match';
 import { CommandFunction, OptionType } from '../types';
 import { checkAdminPermission } from '../utils';
 
@@ -28,9 +28,17 @@ const genMatchString = (match: Match) => {
     const stageSetting = matchModeMap[match.matchMode].flow[match.stageResult.length];
     return `
 **${match.channel.name}: ${teamA.name} vs ${teamB.name}**
-狀態：${match.state} / ${stageSetting ? nowTeam.name + ' ' + stageSetting.option + ' ' + stageSetting.amount : '無'}
+狀態：${matchStateWording[match.state]} / ${stageSetting ? nowTeam.name + ' ' + stageSetting.option + ' ' + stageSetting.amount : '無'}
 ${matchModeMap[match.matchMode].logTotal(match)}
 `;
+};
+
+const matchStateWording: { [key in MatchState]: string } = {
+    [MatchState.prepare]: '準備中',
+    [MatchState.running]: '進行中',
+    [MatchState.pause]: '暫停',
+    [MatchState.complete]: '待確認',
+    [MatchState.confirm]: '已確認',
 };
 
 export default {
