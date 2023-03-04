@@ -95,7 +95,7 @@ export const BPEX_onSelect = (flow: StageSetting<BPEXOption>[], match: Match, op
                 ephemeral: true,
             };
         }
-        match.setPause();
+
         const stageResult: BPEXStageResult = { option: 'exchange', operators: exchangeReg };
         match.stageResult.push(stageResult);
         exchangeRegMap.delete(exchangeRegID);
@@ -103,6 +103,7 @@ export const BPEX_onSelect = (flow: StageSetting<BPEXOption>[], match: Match, op
         BP_onSelect(flow as StageSetting<BPOption>[], match, operatorList, member);
     }
 
+    match.setPause();
     const selectResult = option == 'exchange' ? '' : `${nowTeam.name} 選擇了 \`${operatorList.join(' ')}\`\n`;
     const stageLog = BPEX_logTotal(flow, match);
     const timeLimitDesc = match.setStart(flow);

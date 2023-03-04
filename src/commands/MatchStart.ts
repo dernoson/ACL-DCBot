@@ -28,24 +28,26 @@ const MatchStart: CommandFunction<Options_MatchStart> = (ctx, { channel, all, fo
 
 const setMatchStart = (match: Match, force?: boolean) => {
     const lastState = match.state;
-    const modeSetting = matchModeMap[match.matchMode];
-    const timeLimitDesc = match.setStart(modeSetting.flow);
-    if (!timeLimitDesc) return false;
+    if (lastState != MatchState.prepare && lastState != MatchState.pause) return false;
 
-    const result = modeSetting.logTotal(match) + modeSetting.onStart(match) + timeLimitDesc;
+    match.timeoutHandler?.cancel();
+    const modeSetting = matchModeMap[match.matchMode];
+    const result = modeSetting.logTotal(match) + modeSetting.onStart(match);
+
     const beforeStartDesc =
         `**===  ${roleMention(match.teams[0].id)} vs ${roleMention(match.teams[1].id)} ===**\n` +
         `此次使用的選角流程為 \`${modeSetting.desc}\`\n` +
         `途中遇到問題，都可以tag主辦方或管理員進行處理。\n\n`;
+
     if (lastState == MatchState.prepare && !force) {
         match.send(beforeStartDesc + '選角流程將於 3 分鐘後開始，請主辦方與參賽方做好準備。');
         match.timeoutHandler = createTimeoutHandler(180 * 1000, () => {
-            match.send(result);
+            match.send(result + match.setStart(modeSetting.flow));
         });
     } else if (lastState == MatchState.pause) {
-        match.send(result);
+        match.send(result + match.setStart(modeSetting.flow));
     } else if (lastState == MatchState.prepare) {
-        match.send(beforeStartDesc + result);
+        match.send(beforeStartDesc + result + match.setStart(modeSetting.flow));
     }
 
     return true;

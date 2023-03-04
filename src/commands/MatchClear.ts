@@ -32,7 +32,7 @@ const MatchClear: CommandFunction<Options_MatchStart> = (ctx, { channel, all }) 
 };
 
 export const clearMatchContent = (match: Match) => {
-    match.setPause();
+    match.timeoutHandler?.cancel();
     const modeSetting = matchModeMap[match.matchMode];
     for (let i = 0; i < match.stageResult.length; i++) modeSetting.onRemove(match);
     matchMap.delete(match.channel.id);
