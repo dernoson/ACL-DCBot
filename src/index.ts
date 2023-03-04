@@ -1,4 +1,4 @@
-import { Client, Message, REST, Routes } from 'discord.js';
+import { Client, REST, Routes } from 'discord.js';
 import { BotToken, BotClientID } from './secret/tokens';
 import { CommandExport } from './types';
 import { getCommandOptions, logCommandResult } from './utils';
@@ -16,6 +16,7 @@ import LogConfig from './commands/LogConfig';
 import SetConfig from './commands/SetConfig';
 import Select from './commands/Select';
 import { Help, helpDefs } from './commands/Help';
+import HelloWorld from './commands/HelloWorld';
 
 const commands: CommandExport[] = [
     Select,
@@ -32,18 +33,23 @@ const commands: CommandExport[] = [
 
 const commandDefs = commands.map((o) => o.defs).concat(helpDefs);
 
-const commandHandlers: { [key: string]: CommandExport['func'] } = commands.reduce((prev, curr) => {
-    const name = curr.defs.name;
-    if (!name) return prev;
-    return { ...prev, [name]: curr.func };
-}, {});
+const commandHandlers: { [key: string]: CommandExport['func'] } = commands.reduce(
+    (prev, curr) => {
+        const name = curr.defs.name;
+        if (!name) return prev;
+        return { ...prev, [name]: curr.func };
+    },
+    {
+        [HelloWorld.defs.name]: HelloWorld.func,
+    }
+);
 
 const rest = new REST().setToken(BotToken);
 
 (async () => {
     try {
         console.log('Started refreshing application (/) commands.');
-        await rest.put(Routes.applicationCommands(BotClientID), { body: commandDefs });
+        await rest.put(Routes.applicationCommands(BotClientID), { body: commandDefs.concat(HelloWorld.defs) });
         console.log('Successfully reloaded application (/) commands.');
     } catch (error) {
         console.error(error);
@@ -55,10 +61,6 @@ const client = new Client({ intents: IntentOptions });
 client.on('ready', (client) => {
     console.log(`Logged in as ${client.user.tag}!`);
     botEnv.onBotReady(client);
-});
-
-client.on('messageCreate', (message: Message) => {
-    if (!message.inGuild()) return;
 });
 
 client.on('interactionCreate', async (interaction) => {
