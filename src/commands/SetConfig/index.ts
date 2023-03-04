@@ -1,6 +1,8 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { BPTimeLimit } from './BPTimeLimit';
 import { MatchFlow } from './MatchFlow';
+import { EnableExtraResponse } from './EnableExtraResponse';
+import { ResponsePlugin } from './ResponsePlugin';
 import { CommandFunction, OptionType } from '../../types';
 import { checkAdminPermission, getObjectKeys } from '../../utils';
 import { ConfigOption } from './types';
@@ -20,6 +22,8 @@ const createConfigOptionMap = <M extends { [key: string]: ConfigOption }>(map: M
 const configOptions = createConfigOptionMap({
     BPTimeLimit,
     MatchFlow,
+    EnableExtraResponse,
+    ResponsePlugin,
 });
 
 export default {

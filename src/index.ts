@@ -16,7 +16,8 @@ import LogConfig from './commands/LogConfig';
 import SetConfig from './commands/SetConfig';
 import Select from './commands/Select';
 import { Help, helpDefs } from './commands/Help';
-import HelloWorld from './commands/HelloWorld';
+import { matchMap } from './match';
+import { extraResponse } from './responses';
 
 const commands: CommandExport[] = [
     Select,
@@ -33,23 +34,18 @@ const commands: CommandExport[] = [
 
 const commandDefs = commands.map((o) => o.defs).concat(helpDefs);
 
-const commandHandlers: { [key: string]: CommandExport['func'] } = commands.reduce(
-    (prev, curr) => {
-        const name = curr.defs.name;
-        if (!name) return prev;
-        return { ...prev, [name]: curr.func };
-    },
-    {
-        [HelloWorld.defs.name]: HelloWorld.func,
-    }
-);
+const commandHandlers: { [key: string]: CommandExport['func'] } = commands.reduce((prev, curr) => {
+    const name = curr.defs.name;
+    if (!name) return prev;
+    return { ...prev, [name]: curr.func };
+}, {});
 
 const rest = new REST().setToken(BotToken);
 
 (async () => {
     try {
         console.log('Started refreshing application (/) commands.');
-        await rest.put(Routes.applicationCommands(BotClientID), { body: commandDefs.concat(HelloWorld.defs) });
+        await rest.put(Routes.applicationCommands(BotClientID), { body: commandDefs });
         console.log('Successfully reloaded application (/) commands.');
     } catch (error) {
         console.error(error);
@@ -61,6 +57,15 @@ const client = new Client({ intents: IntentOptions });
 client.on('ready', (client) => {
     console.log(`Logged in as ${client.user.tag}!`);
     botEnv.onBotReady(client);
+});
+
+client.on('messageCreate', async (message) => {
+    if (!botEnv.get('EnableExtraResponse')) return;
+    if (!message.inGuild() || message.member?.user.bot) return;
+    if (message.channelId == botEnv.logChannel?.id || matchMap.has(message.channelId)) return;
+
+    const resp = extraResponse(message);
+    if (resp) await message.reply(resp);
 });
 
 client.on('interactionCreate', async (interaction) => {
