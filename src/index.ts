@@ -15,6 +15,7 @@ import LogMatch from './commands/LogMatch';
 import LogConfig from './commands/LogConfig';
 import SetConfig from './commands/SetConfig';
 import Select from './commands/Select';
+import { Help, helpDefs } from './commands/Help';
 
 const commands: CommandExport[] = [
     Select,
@@ -24,12 +25,12 @@ const commands: CommandExport[] = [
     MatchConfirm,
     MatchLaststep,
     LogMatch,
-    LogConfig,
     SetEnv,
+    LogConfig,
     SetConfig,
 ];
 
-const commandDefs = commands.map((o) => o.defs);
+const commandDefs = commands.map((o) => o.defs).concat(helpDefs);
 
 const commandHandlers: { [key: string]: CommandExport['func'] } = commands.reduce((prev, curr) => {
     const name = curr.defs.name;
@@ -65,6 +66,11 @@ client.on('interactionCreate', async (interaction) => {
     if (!interaction.isChatInputCommand()) return;
 
     const commandName = interaction.commandName;
+    if (commandName == 'help') {
+        Help(interaction, commandDefs);
+        return;
+    }
+
     const username = interaction.user.username;
     const handler = commandHandlers[commandName];
     if (!handler) return;
