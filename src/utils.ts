@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, Client } from 'discord.js';
+import { ApplicationCommandOptionType, Client, Guild, GuildTextBasedChannel, PermissionFlagsBits } from 'discord.js';
 import { botEnv } from './config/botSettings';
 import { CommandContext, CommandResult, OptionType } from './types';
 
@@ -66,4 +66,10 @@ export const commandSuccessResp = (content: string): CommandResult => ({ content
 
 export const checkAdminPermission = (ctx: CommandContext) => {
     if (!botEnv.hasAdminPermission(ctx.member)) throw '並非主辦方，無法使用該指令';
+};
+
+export const checkSendMessagePermission = (guild: Guild, channel: GuildTextBasedChannel) => {
+    if (!guild.members.me?.permissions.has(PermissionFlagsBits.SendMessages)) return false;
+    if (!guild.members.me?.permissionsIn(channel).has(PermissionFlagsBits.SendMessages)) return false;
+    return true;
 };

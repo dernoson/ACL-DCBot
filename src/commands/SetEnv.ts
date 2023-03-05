@@ -1,6 +1,17 @@
-import { channelMention, ChannelType, GuildMember, PermissionFlagsBits, Role, roleMention, SlashCommandBuilder, TextChannel } from 'discord.js';
+import {
+    BaseGuildTextChannel,
+    channelMention,
+    ChannelType,
+    GuildMember,
+    PermissionFlagsBits,
+    Role,
+    roleMention,
+    SlashCommandBuilder,
+    TextChannel,
+} from 'discord.js';
 import { botEnv, dumpSetting } from '../config/botSettings';
 import type { CommandFunction, OptionType } from '../types';
+import { checkSendMessagePermission } from '../utils';
 
 type Options_SetEnv = {
     admin_role?: OptionType['Role'];
@@ -12,7 +23,9 @@ const SetEnv: CommandFunction<Options_SetEnv> = (ctx, { admin_role, log_channel 
     if (!(member instanceof GuildMember) || !member.permissions.has(PermissionFlagsBits.Administrator)) throw '並非管理員，無法使用該指令';
 
     const admin = admin_role instanceof Role ? admin_role : undefined;
-    const logChannel = log_channel instanceof TextChannel ? log_channel : undefined;
+    const logChannel = log_channel instanceof BaseGuildTextChannel ? log_channel : undefined;
+    if (logChannel && (!ctx.guild || !checkSendMessagePermission(ctx.guild, logChannel)))
+        throw '機器人在伺服器或指定頻道中並無發送訊息權限，請確認伺服器設定';
     botEnv.admin = admin;
     botEnv.logChannel = logChannel;
     botEnv.set('admin', admin);

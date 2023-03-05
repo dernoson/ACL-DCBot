@@ -1,8 +1,8 @@
-import { ChannelType, Role, SlashCommandBuilder, TextChannel } from 'discord.js';
+import { BaseGuildTextChannel, ChannelType, Role, SlashCommandBuilder, TextChannel } from 'discord.js';
 import { botEnv } from '../config/botSettings';
 import type { CommandFunction, OptionType } from '../types';
 import { Match, defaultMatchMode, matchMap, MatchMode, matchModeMap } from '../match';
-import { checkAdminPermission, commandSuccessResp } from '../utils';
+import { checkAdminPermission, checkSendMessagePermission, commandSuccessResp } from '../utils';
 import { clearMatchContent } from './MatchClear';
 
 type Options_MatchSet = {
@@ -15,7 +15,8 @@ type Options_MatchSet = {
 const MatchSet: CommandFunction<Options_MatchSet> = (ctx, { channel, team1, team2, force }) => {
     checkAdminPermission(ctx);
 
-    if (!(channel instanceof TextChannel)) throw '指定頻道非純文字頻道';
+    if (!(channel instanceof BaseGuildTextChannel)) throw '指定頻道非伺服器中的純文字頻道';
+    if (!ctx.guild || !checkSendMessagePermission(ctx.guild, channel)) throw '機器人在伺服器或指定頻道中並無發送訊息權限，請確認伺服器設定';
     if (!(team1 instanceof Role) || !(team2 instanceof Role)) throw '指定身分組不符需求';
     const oldMatch = matchMap.get(channel.id);
     if (!force && oldMatch) throw '該頻道尚留存比賽分組指定，可使用match_clear指令先清除該頻道舊有指定，或是在該指令附加 { force: true } 選項';

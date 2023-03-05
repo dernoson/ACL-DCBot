@@ -1,7 +1,7 @@
-import { Client, REST, Routes } from 'discord.js';
+import { Client, GuildChannel, REST, Routes } from 'discord.js';
 import { BotToken, BotClientID } from './secret/tokens';
 import { CommandExport } from './types';
-import { getCommandOptions, logCommandResult } from './utils';
+import { checkSendMessagePermission, getCommandOptions, logCommandResult } from './utils';
 import { IntentOptions, normalMentionOptions } from './config/optionSettings';
 import { botEnv } from './config/botSettings';
 
@@ -61,7 +61,7 @@ client.on('ready', (client) => {
 
 client.on('messageCreate', async (message) => {
     if (!botEnv.get('EnableExtraResponse')) return;
-    if (!message.inGuild() || message.member?.user.bot) return;
+    if (!message.inGuild() || message.member?.user.bot || !checkSendMessagePermission(message.guild, message.channel)) return;
     if (message.channelId == botEnv.logChannel?.id || matchMap.has(message.channelId)) return;
 
     const resp = extraResponse(message);
@@ -71,6 +71,12 @@ client.on('messageCreate', async (message) => {
 client.on('interactionCreate', async (interaction) => {
     if (!client.isReady) return;
     if (!interaction.isChatInputCommand()) return;
+    if (
+        !interaction.guild ||
+        !(interaction.channel instanceof GuildChannel) ||
+        !checkSendMessagePermission(interaction.guild, interaction.channel)
+    )
+        return;
 
     const commandName = interaction.commandName;
     if (commandName == 'help') {

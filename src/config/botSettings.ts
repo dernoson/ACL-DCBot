@@ -1,4 +1,5 @@
 import {
+    BaseGuildTextChannel,
     CacheType,
     ChatInputCommandInteraction,
     Client,
@@ -18,7 +19,7 @@ const botSettings: { [key: string]: unknown } = settings;
 class BotEnv {
     private guild?: Guild;
     admin?: Role;
-    logChannel?: TextChannel;
+    logChannel?: BaseGuildTextChannel;
 
     onBotReady(client: Client<true>) {
         this.guild = client.guilds.cache.first();

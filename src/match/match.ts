@@ -1,4 +1,4 @@
-import { GuildMember, Role, TextChannel } from 'discord.js';
+import { BaseGuildTextChannel, GuildMember, Role, TextChannel } from 'discord.js';
 import { botEnv, getAdminMention } from '../config/botSettings';
 import { normalMentionOptions } from '../config/optionSettings';
 import { CommandResult } from '../types';
@@ -6,14 +6,14 @@ import { createTimeoutHandler, TimeoutHandler } from '../utils';
 import { MatchMode, StageHeader, StageSetting } from './types';
 
 export class Match {
-    readonly channel: TextChannel;
+    readonly channel: BaseGuildTextChannel;
     readonly teams: Readonly<[Role, Role]>;
     readonly matchMode: MatchMode;
     readonly stageResult: StageHeader[] = [];
     state = MatchState.prepare;
     timeoutHandler?: TimeoutHandler;
 
-    constructor(channel: TextChannel, teams: [Role, Role], matchMode: MatchMode) {
+    constructor(channel: BaseGuildTextChannel, teams: [Role, Role], matchMode: MatchMode) {
         this.channel = channel;
         this.teams = teams;
         this.matchMode = matchMode;
