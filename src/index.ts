@@ -90,7 +90,7 @@ client.on('interactionCreate', async (interaction) => {
         const errorLog = typeof error == 'string' ? error : '未知錯誤';
         if (typeof error != 'string') console.log(error);
         logCommandResult(commandName, 'fail', username, errorLog);
-        await interaction.reply({ content: errorLog, ephemeral: true });
+        await interaction.reply({ content: '！！！指令失敗！！！\n' + errorLog, ephemeral: true });
     }
 });
 

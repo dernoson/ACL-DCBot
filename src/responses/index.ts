@@ -1,8 +1,10 @@
 import { Message } from 'discord.js';
 import { botEnv } from '../config/botSettings';
+import { MessageResponser } from './types';
 import { sellVegetable } from './sellVegetable';
 import { grapeFruitify } from './grapeFruitify';
-import { MessageResponser } from './types';
+import { chongyue } from './chongyue';
+import { saileach } from './saileach';
 
 export const extraResponse = (message: Message<true>) => {
     const pluginKey = botEnv.get('ResponsePlugin');
@@ -15,4 +17,6 @@ export const extraResponse = (message: Message<true>) => {
 export const responsePlugins: { [key: string]: MessageResponser | undefined } = {
     sellVegetable,
     grapeFruitify,
+    chongyue,
+    saileach,
 };
