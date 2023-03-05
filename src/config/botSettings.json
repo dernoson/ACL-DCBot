@@ -4,5 +4,5 @@
 	"BPTimeLimit": 180,
 	"HelloWorld": 0,
 	"EnableExtraResponse": 1,
-	"ResponsePlugin": "sellVegetable"
+	"ResponsePlugin": "chongyue"
 }

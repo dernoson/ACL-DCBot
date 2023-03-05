@@ -10,7 +10,7 @@ const MatchLaststep: CommandFunction = (ctx) => {
     if (!(channel instanceof TextChannel)) throw '指定頻道非純文字頻道';
     const match = matchMap.get(channel.id);
     if (!match) throw '頻道非BP使用頻道';
-    if (match.state != MatchState.running && match.state != MatchState.pause) throw '頻道BP流程未處於運行中或是暫停狀態';
+    if (match.state == MatchState.prepare || match.state == MatchState.confirm) throw '頻道BP流程未處於可後退狀態';
 
     match.setPause();
     const content = matchModeMap[match.matchMode].onRemove(match);

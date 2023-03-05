@@ -28,7 +28,7 @@ export class Match {
     }
 
     setPause() {
-        if (this.state != MatchState.running) return;
+        if (this.state != MatchState.running && this.state != MatchState.complete) return;
         this.state = MatchState.pause;
         this.timeoutHandler?.cancel();
     }
