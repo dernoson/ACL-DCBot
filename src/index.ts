@@ -60,7 +60,6 @@ client.on('ready', (client) => {
 });
 
 client.on('messageCreate', async (message) => {
-    if (!botEnv.get('EnableExtraResponse')) return;
     if (!message.inGuild() || message.member?.user.bot || !checkSendMessagePermission(message.guild, message.channel)) return;
     if (message.channelId == botEnv.logChannel?.id || matchMap.has(message.channelId)) return;
 

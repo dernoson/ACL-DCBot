@@ -3,6 +3,5 @@
 	"LogChannel": "1072888724406415431",
 	"BPTimeLimit": 180,
 	"HelloWorld": 0,
-	"EnableExtraResponse": 1,
 	"ResponsePlugin": "chongyue"
 }
