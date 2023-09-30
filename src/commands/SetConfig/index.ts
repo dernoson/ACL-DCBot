@@ -12,7 +12,7 @@ const configOptions = createRestrictObj<Record<string, ConfigOption>>()({
 });
 
 const optionDescs = getObjectEntries(configOptions).reduce(
-    (prev, [value, name]) => ({ ...prev, [value]: name }),
+    (prev, [value, name]) => ({ ...prev, [value]: name.desc }),
     {} as Record<keyof typeof configOptions, string>
 );
 
