@@ -37,7 +37,7 @@ export const createCommand = (name: string, description: string): I_Command => {
                     .setName(name)
                     .setDescription(description)
                     .setRequired(required ?? false);
-                if (choices) op.addChoices(...getObjectEntries(choices).map(([value, name]) => ({ name, value })));
+                if (choices) op = op.addChoices(...getObjectEntries(choices).map(([value, name]) => ({ name, value })));
                 return op;
             });
             return command;
@@ -48,7 +48,7 @@ export const createCommand = (name: string, description: string): I_Command => {
                     .setName(name)
                     .setDescription(description)
                     .setRequired(required ?? false);
-                if (choices) op.addChoices(...getObjectEntries(choices).map(([value, name]) => ({ name, value })));
+                if (choices) op = op.addChoices(...getObjectEntries(choices).map(([value, name]) => ({ name, value })));
                 return op;
             });
             return command;
@@ -59,7 +59,7 @@ export const createCommand = (name: string, description: string): I_Command => {
                     .setName(name)
                     .setDescription(description)
                     .setRequired(required ?? false);
-                if (choices) op.addChoices(...getObjectEntries(choices).map(([value, name]) => ({ name, value })));
+                if (choices) op = op.addChoices(...getObjectEntries(choices).map(([value, name]) => ({ name, value })));
                 return op;
             });
             return command;
