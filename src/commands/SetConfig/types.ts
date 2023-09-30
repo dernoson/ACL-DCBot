@@ -1,6 +1,7 @@
-import { CommandContext, CommandResult } from '../../types';
+import { ChatInputCommandInteraction } from 'discord.js';
+import { CommandResult } from '../../commandUtils';
 
 export type ConfigOption = {
     desc: string;
-    handler: (ctx: CommandContext, value: string | undefined) => CommandResult;
+    handler: (ctx: ChatInputCommandInteraction, value: string | undefined) => CommandResult;
 };

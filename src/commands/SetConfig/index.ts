@@ -1,40 +1,25 @@
-import { SlashCommandBuilder } from 'discord.js';
 import { BPTimeLimit } from './BPTimeLimit';
 import { MatchFlow } from './MatchFlow';
 import { ResponsePlugin } from './ResponsePlugin';
-import { CommandFunction, OptionType } from '../../types';
-import { checkAdminPermission, getObjectKeys } from '../../utils';
+import { checkAdminPermission, createRestrictObj, getObjectEntries } from '../../utils';
 import { ConfigOption } from './types';
+import { createCommand } from '../../commandUtils';
 
-type Options_SetConfig = {
-    option: keyof typeof configOptions;
-    value?: OptionType['String'];
-};
-
-const SetConfig: CommandFunction<Options_SetConfig> = (ctx, args) => {
-    checkAdminPermission(ctx);
-    return configOptions[args.option].handler(ctx, args.value);
-};
-
-const createConfigOptionMap = <M extends { [key: string]: ConfigOption }>(map: M) => map;
-
-const configOptions = createConfigOptionMap({
+const configOptions = createRestrictObj<Record<string, ConfigOption>>()({
     BPTimeLimit,
     MatchFlow,
     ResponsePlugin,
 });
 
-export default {
-    func: SetConfig,
-    defs: new SlashCommandBuilder()
-        .setName('set_config')
-        .setDescription('[ 主辦方指令 ] 設定環境變數')
-        .addStringOption((option) =>
-            option
-                .setName('option')
-                .setDescription('選擇要設定的變數選項')
-                .addChoices(...getObjectKeys(configOptions).map((value) => ({ name: configOptions[value].desc, value })))
-                .setRequired(true)
-        )
-        .addStringOption((option) => option.setName('value').setDescription('設定值')),
-};
+const optionDescs = getObjectEntries(configOptions).reduce(
+    (prev, [value, name]) => ({ ...prev, [value]: name }),
+    {} as Record<keyof typeof configOptions, string>
+);
+
+export default createCommand('set_config', '[ 主辦方指令 ] 設定環境變數')
+    .option_String('option', '選擇要設定的變數選項', true, optionDescs)
+    .option_String('value', '設定值')
+    .callback((ctx, { option, value }) => {
+        checkAdminPermission(ctx);
+        return configOptions[option].handler(ctx, value);
+    });

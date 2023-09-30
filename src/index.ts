@@ -1,101 +1,52 @@
-import { Client, GuildChannel, REST, Routes } from 'discord.js';
+import { Client, GatewayIntentBits, PermissionFlagsBits, REST, Routes } from 'discord.js';
 import { BotToken, BotClientID } from './secret/tokens';
-import { CommandExport } from './types';
-import { checkSendMessagePermission, getCommandOptions, logCommandResult } from './utils';
-import { IntentOptions, normalMentionOptions } from './config/optionSettings';
 import { botEnv } from './config/botSettings';
-
-import SetEnv from './commands/SetEnv';
-import MatchSet from './commands/MatchSet';
-import MatchStart from './commands/MatchStart';
-import MatchClear from './commands/MatchClear';
-import MatchConfirm from './commands/MatchConfirm';
-import MatchLaststep from './commands/MatchLaststep';
-import LogMatch from './commands/LogMatch';
-import LogConfig from './commands/LogConfig';
-import SetConfig from './commands/SetConfig';
-import Select from './commands/Select';
-import { Help, helpDefs } from './commands/Help';
 import { matchMap } from './match';
 import { extraResponse } from './responses';
+import { Help, commandDefs, commandFunctions } from './commands';
+import { writeError } from './fileReader';
 
-const commands: CommandExport[] = [
-    Select,
-    MatchSet,
-    MatchStart,
-    MatchClear,
-    MatchConfirm,
-    MatchLaststep,
-    LogMatch,
-    SetEnv,
-    LogConfig,
-    SetConfig,
-];
+const helpCommandBuilder = Help.getBuilder();
+const requestDataBody = commandDefs.concat(helpCommandBuilder);
+const interactionExecutes = { ...commandFunctions, [helpCommandBuilder.name]: Help.getExecute() };
 
-const commandDefs = commands.map((o) => o.defs).concat(helpDefs);
+new REST()
+    .setToken(BotToken)
+    .put(Routes.applicationCommands(BotClientID), { body: requestDataBody })
+    .then(() => console.log('Successfully reloaded application (/) commands.'))
+    .catch((error) => console.error(error));
 
-const commandHandlers: { [key: string]: CommandExport['func'] } = commands.reduce((prev, curr) => {
-    const name = curr.defs.name;
-    if (!name) return prev;
-    return { ...prev, [name]: curr.func };
-}, {});
+const client = new Client({
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
+});
 
-const rest = new REST().setToken(BotToken);
-
-(async () => {
-    try {
-        console.log('Started refreshing application (/) commands.');
-        await rest.put(Routes.applicationCommands(BotClientID), { body: commandDefs });
-        console.log('Successfully reloaded application (/) commands.');
-    } catch (error) {
-        console.error(error);
-    }
-})();
-
-const client = new Client({ intents: IntentOptions });
-
-client.on('ready', (client) => {
+client.on('ready', async (client) => {
     console.log(`Logged in as ${client.user.tag}!`);
-    botEnv.onBotReady(client);
+    await botEnv.onBotReady(client);
 });
 
 client.on('messageCreate', async (message) => {
-    if (!message.inGuild() || message.member?.user.bot || !checkSendMessagePermission(message.guild, message.channel)) return;
+    if (!message.inGuild() || message.author.bot) return;
     if (message.channelId == botEnv.logChannel?.id || matchMap.has(message.channelId)) return;
+    const selfMember = message.guild.members.me;
+    if (!selfMember?.permissions.has(PermissionFlagsBits.SendMessages)) return;
+    if (!selfMember?.permissionsIn(message.channel).has(PermissionFlagsBits.SendMessages)) return;
 
-    const resp = extraResponse(message);
-    if (resp) await message.reply(resp);
+    try {
+        const resp = extraResponse(message);
+        if (resp) await message.reply(resp);
+    } catch (error) {
+        writeError(error);
+    }
 });
 
 client.on('interactionCreate', async (interaction) => {
-    if (!client.isReady) return;
-    if (!interaction.isChatInputCommand()) return;
-    if (
-        !interaction.guild ||
-        !(interaction.channel instanceof GuildChannel) ||
-        !checkSendMessagePermission(interaction.guild, interaction.channel)
-    )
-        return;
+    if (!interaction.inGuild() || !interaction.isChatInputCommand()) return;
 
-    const commandName = interaction.commandName;
-    if (commandName == 'help') {
-        Help(interaction, commandDefs);
-        return;
-    }
-
-    const username = interaction.user.username;
-    const handler = commandHandlers[commandName];
-    if (!handler) return;
     try {
-        const result = handler(interaction, getCommandOptions(interaction.options, client));
-        const { content, log } = typeof result == 'string' ? { content: result, log: undefined } : result;
-        log && logCommandResult(commandName, 'success', username, log);
-        await interaction.reply({ content, ephemeral: typeof result != 'string' && result.ephemeral, allowedMentions: normalMentionOptions });
+        await interactionExecutes[interaction.commandName]?.(interaction);
     } catch (error) {
-        const errorLog = typeof error == 'string' ? error : '未知錯誤';
-        if (typeof error != 'string') console.log(error);
-        logCommandResult(commandName, 'fail', username, errorLog);
-        await interaction.reply({ content: '！！！指令失敗！！！\n' + errorLog, ephemeral: true });
+        writeError(error);
     }
 });
 
