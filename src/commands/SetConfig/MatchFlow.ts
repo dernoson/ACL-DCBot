@@ -15,7 +15,7 @@ export const MatchFlow: ConfigOption = {
             dumpSetting();
             return commandSuccessResp(`[設定機器人環境] BP流程設置：${matchModeMap[value].desc}`);
         } else {
-            throw `[ MatchFlow ] 僅可接受以下字串值：\n${MatchModeArr.map((key) => `\`${key}\` : ${matchModeMap[key].desc}`).join('\n')}`;
+            throw `僅可接受以下字串值：\n${MatchModeArr.map((key) => `\`${key}\` : ${matchModeMap[key].desc}`).join('\n')}`;
         }
     },
 };

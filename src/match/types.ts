@@ -1,3 +1,10 @@
+import { ChatInputCommandInteraction } from 'discord.js';
+import { CommandResult } from '../commandUtils';
+
+export interface I_Match {
+    select(ctx: ChatInputCommandInteraction, operators: string[]): CommandResult;
+}
+
 export type StageSetting<O extends string = string> = StageHeader<O> & {
     amount: number;
 };
@@ -6,7 +13,7 @@ export type StageHeader<O extends string = string> = {
     option: O;
 };
 
-export type BPOption = typeof BPOptionKeys[number];
+export type BPOption = (typeof BPOptionKeys)[number];
 
 export const BPOptionKeys = ['ban', 'pick'] as const;
 
@@ -18,7 +25,7 @@ export type BPStageResult = StageHeader<BPOption> & {
 
 export const isBPStageResult = (stage: StageHeader): stage is BPStageResult => BPOptionKeys.includes(stage.option as BPOption);
 
-export type BPEXOption = typeof BPEXOptionKeys[number];
+export type BPEXOption = (typeof BPEXOptionKeys)[number];
 
 export const BPEXOptionKeys = ['ban', 'pick', 'exchange'] as const;
 

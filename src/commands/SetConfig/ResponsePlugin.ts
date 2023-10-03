@@ -15,9 +15,7 @@ export const ResponsePlugin: ConfigOption = {
             dumpSetting();
             return commandSuccessResp('[設定機器人環境] 回覆彩蛋使用套件：' + responsePlugins[value]?.desc);
         } else {
-            throw `[ ResponsePlugin ] 僅可接受以下字串值：\n${responsePluginsArr
-                .map((key) => `\`${key}\` : ${responsePlugins[key]?.desc}`)
-                .join('\n')}`;
+            throw `僅可接受以下字串值：\n${responsePluginsArr.map((key) => `\`${key}\` : ${responsePlugins[key]?.desc}`).join('\n')}`;
         }
     },
 };

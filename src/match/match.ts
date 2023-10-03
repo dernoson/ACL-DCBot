@@ -54,7 +54,6 @@ export const enum MatchState {
     running,
     pause,
     complete,
-    confirm,
 }
 
 export type ModeSetting = {
