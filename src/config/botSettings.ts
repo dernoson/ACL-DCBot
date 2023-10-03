@@ -1,6 +1,5 @@
 import {
     BaseGuildTextChannel,
-    CacheType,
     ChatInputCommandInteraction,
     Client,
     Guild,
@@ -11,18 +10,16 @@ import {
     TextChannel,
     User,
 } from 'discord.js';
-import settings from './botSettings.json' assert { type: 'json' };
-import fs from 'fs';
-
-const botSettings: { [key: string]: unknown } = settings;
+import { readJson, writeJson } from '../fileReader';
 
 class BotEnv {
     private guild?: Guild;
     admin?: Role;
     logChannel?: BaseGuildTextChannel;
 
-    onBotReady(client: Client<true>) {
+    async onBotReady(client: Client<true>) {
         this.guild = client.guilds.cache.first();
+        botSettings = await readJson('config.json', () => ({}));
         if (!this.guild) throw 'Have no guild';
         this.admin = this.getRole('Admin');
         this.logChannel = this.getTextChannel('LogChannel');
@@ -35,7 +32,7 @@ class BotEnv {
         else console.log(content);
     }
 
-    hasAdminPermission(member: ChatInputCommandInteraction<CacheType>['member']) {
+    hasAdminPermission(member: ChatInputCommandInteraction['member']) {
         if (!(member instanceof GuildMember)) return false;
         if (this.admin) return member.roles.cache.some((role) => role.id == this.admin?.id);
         return member.permissions.has(PermissionFlagsBits.Administrator);
@@ -54,8 +51,8 @@ class BotEnv {
     }
 
     set(key: string, value: unknown) {
-        if (value instanceof Role || value instanceof TextChannel || value instanceof User) settings[key] = value.id;
-        else settings[key] = value;
+        if (value instanceof Role || value instanceof TextChannel || value instanceof User) botSettings[key] = value.id;
+        else botSettings[key] = value;
     }
 
     get(key: string) {
@@ -64,7 +61,7 @@ class BotEnv {
 }
 
 export const dumpSetting = () => {
-    fs.writeFile('src/config/botSettings.json', JSON.stringify(botSettings, null, '\t'), (error) => error && console.log(error));
+    writeJson(botSettings, 'config.json');
 };
 
 export const getSetting = () => botSettings;
@@ -72,3 +69,5 @@ export const getSetting = () => botSettings;
 export const getAdminMention = () => (botEnv.admin ? roleMention(botEnv.admin.id) : '伺服器管理員');
 
 export const botEnv = new BotEnv();
+
+let botSettings: Record<string, unknown>;

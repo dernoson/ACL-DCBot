@@ -1,6 +1,7 @@
 {
     "type": "module",
     "dependencies": {
+        "dayjs": "^1.11.9",
         "discord.js": "^14.7.1"
     },
     "devDependencies": {

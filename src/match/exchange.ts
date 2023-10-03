@@ -1,9 +1,10 @@
 import { GuildMember } from 'discord.js';
 import { getAdminMention } from '../config/botSettings';
-import { CommandResult } from '../types';
+
 import { BP_onStart, BP_onRemove, BP_onSelect } from './bp';
 import { Match, ModeSetting } from './match';
-import { BPEXOption, calcFlowTotal, StageSetting, isBPEXStageResult, BPEXStageResult, BPOption, isBPStageResult } from './types';
+import { BPEXOption, calcFlowTotal, StageSetting, isBPEXStageResult, BPEXStageResult, BPOption } from './types';
+import { CommandResult } from '../commandUtils';
 
 const exchangeRegMap = new Map<string, [string[], string[]]>();
 

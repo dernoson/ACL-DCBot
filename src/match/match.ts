@@ -1,9 +1,8 @@
-import { BaseGuildTextChannel, GuildMember, Role, TextChannel } from 'discord.js';
+import { BaseGuildTextChannel, GuildMember, Role } from 'discord.js';
 import { botEnv, getAdminMention } from '../config/botSettings';
-import { normalMentionOptions } from '../config/optionSettings';
-import { CommandResult } from '../types';
-import { createTimeoutHandler, TimeoutHandler } from '../utils';
+import { createTimeoutHandler, TimeoutHandler, normalMentionOptions } from '../utils';
 import { MatchMode, StageHeader, StageSetting } from './types';
+import { CommandResult } from '../commandUtils';
 
 export class Match {
     readonly channel: BaseGuildTextChannel;
