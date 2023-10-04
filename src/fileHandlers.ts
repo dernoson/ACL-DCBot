@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import fs from 'fs/promises';
-import { MutualLock, createMutualLock } from '../utils';
+import { MutualLock, createMutualLock } from './utils';
 
 export const writeError = (error: any) => {
     const filename = 'errorLog-' + dayjs().format('YYYY-MM-DD_HH-mm-ss') + '.json';

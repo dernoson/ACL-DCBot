@@ -4,7 +4,7 @@ import { botEnv } from './BotEnv';
 import { matchMap } from './match';
 import { extraResponse } from './responses';
 import { Help, commandDefs, commandFunctions } from './commands';
-import { writeError } from './fileReader';
+import { writeError } from './fileHandlers';
 
 const helpCommandBuilder = Help.getBuilder();
 const requestDataBody = commandDefs.concat(helpCommandBuilder);
