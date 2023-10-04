@@ -26,13 +26,13 @@ client.on('ready', async (client) => {
 });
 
 client.on('messageCreate', async (message) => {
-    if (!message.inGuild() || message.author.bot) return;
-    if (message.channelId == botEnv.logChannel?.id || matchMap.has(message.channelId)) return;
-    const selfMember = message.guild.members.me;
-    if (!selfMember?.permissions.has(PermissionFlagsBits.SendMessages)) return;
-    if (!selfMember?.permissionsIn(message.channel).has(PermissionFlagsBits.SendMessages)) return;
-
     try {
+        if (!message.inGuild() || message.author.bot) return;
+        if (message.channelId == botEnv.logChannel?.id || matchMap.has(message.channelId)) return;
+        const selfMember = message.guild.members.me;
+        if (!selfMember?.permissions.has(PermissionFlagsBits.SendMessages)) return;
+        if (!selfMember?.permissionsIn(message.channel).has(PermissionFlagsBits.SendMessages)) return;
+
         const resp = extraResponse(message);
         if (resp) await message.reply(resp);
     } catch (error) {
@@ -41,9 +41,9 @@ client.on('messageCreate', async (message) => {
 });
 
 client.on('interactionCreate', async (interaction) => {
-    if (!interaction.inGuild() || !interaction.isChatInputCommand()) return;
-
     try {
+        if (!interaction.inGuild() || !interaction.isChatInputCommand()) return;
+
         await interactionExecutes[interaction.commandName]?.(interaction);
     } catch (error) {
         writeError(error);
