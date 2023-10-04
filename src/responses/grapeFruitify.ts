@@ -1,5 +1,5 @@
 import { MessageResponser } from './types';
-import { getRandomInt } from './utils';
+import { getRandomInt } from '../utils';
 
 export const grapeFruitify: MessageResponser = {
     desc: 'YT實況主的神軸提供(不一定回應，關鍵字：軸)',

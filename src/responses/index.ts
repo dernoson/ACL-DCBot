@@ -1,5 +1,5 @@
 import { Message } from 'discord.js';
-import { botEnv } from '../config/botSettings';
+import { botEnv } from '../BotEnv';
 import { MessageResponser } from './types';
 import { sellVegetable } from './sellVegetable';
 import { grapeFruitify } from './grapeFruitify';

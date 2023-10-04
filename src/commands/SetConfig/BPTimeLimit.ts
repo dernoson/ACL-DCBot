@@ -1,4 +1,4 @@
-import { botEnv, dumpSetting } from '../../config/botSettings';
+import { botEnv, dumpSetting } from '../../BotEnv';
 import { commandSuccessResp } from '../../utils';
 import { ConfigOption } from './types';
 

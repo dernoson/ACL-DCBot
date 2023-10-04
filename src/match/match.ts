@@ -1,5 +1,5 @@
 import { BaseGuildTextChannel, GuildMember, Role } from 'discord.js';
-import { botEnv, getAdminMention } from '../config/botSettings';
+import { botEnv, getAdminMention } from '../BotEnv';
 import { createTimeoutHandler, TimeoutHandler, normalMentionOptions } from '../utils';
 import { StageHeader, StageSetting } from './types';
 import { CommandResult } from '../commandUtils';

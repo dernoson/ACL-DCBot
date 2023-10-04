@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, Guild, GuildTextBasedChannel, MessageMentionOptions, PermissionFlagsBits } from 'discord.js';
-import { botEnv } from './config/botSettings';
+import { botEnv } from './BotEnv';
 import { CommandResult } from './commandUtils';
 
 export const getObjectKeys = <O extends {}>(obj: O) => Object.keys(obj) as (keyof O)[];
@@ -33,6 +33,8 @@ export const createTimeoutHandler = (timeLimitMs: number, onTimeout: () => void)
 export type TimeoutHandler = {
     cancel: () => void;
 };
+
+export const getRandomInt = (range?: number) => Math.floor(Math.random() * (range || 1));
 
 //
 

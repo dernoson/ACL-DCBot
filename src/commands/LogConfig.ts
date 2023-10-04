@@ -1,4 +1,4 @@
-import { getSetting } from '../config/botSettings';
+import { getSetting } from '../BotEnv';
 import { checkAdminPermission } from '../utils';
 import { createCommand } from '../commandUtils';
 

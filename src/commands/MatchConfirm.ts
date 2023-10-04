@@ -1,5 +1,5 @@
 import { TextChannel, EmbedBuilder } from 'discord.js';
-import { botEnv } from '../config/botSettings';
+import { botEnv } from '../BotEnv';
 import { matchMap, matchModeMap, MatchState } from '../match';
 import { checkAdminPermission } from '../utils';
 import { createCommand } from '../commandUtils';

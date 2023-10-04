@@ -1,5 +1,5 @@
 import { BaseGuildTextChannel, channelMention, ChannelType, GuildMember, PermissionFlagsBits, Role, roleMention } from 'discord.js';
-import { botEnv, dumpSetting } from '../config/botSettings';
+import { botEnv, dumpSetting } from '../BotEnv';
 import { checkSendMessagePermission } from '../utils';
 import { createCommand } from '../commandUtils';
 

@@ -1,4 +1,4 @@
-import { botEnv, dumpSetting } from '../../config/botSettings';
+import { botEnv, dumpSetting } from '../../BotEnv';
 import { defaultMatchMode, matchModeMap } from '../../match';
 import { commandSuccessResp, getObjectKeys } from '../../utils';
 import { ConfigOption } from './types';

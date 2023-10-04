@@ -1,6 +1,6 @@
 import { Client, GatewayIntentBits, PermissionFlagsBits, REST, Routes } from 'discord.js';
 import { BotToken, BotClientID } from './secret/tokens';
-import { botEnv } from './config/botSettings';
+import { botEnv } from './BotEnv';
 import { matchMap } from './match';
 import { extraResponse } from './responses';
 import { Help, commandDefs, commandFunctions } from './commands';
