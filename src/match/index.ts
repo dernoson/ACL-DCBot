@@ -1,12 +1,12 @@
-import { MatchMode } from './types';
 import { Match, ModeSetting } from './match';
 import { exchangeFlow, normalFlow, testExchangeFlow, testFlow } from './flows';
 import { createOnSelect_ModeBP, createLogTotal_ModeBP, createOnStart_ModeBP, BP_onRemove } from './bp';
 import { BPEX_onRemove, createOnStart_ModeBPEX, createLogTotal_ModeBPEX, createOnSelect_ModeBPEX } from './exchange';
+import { createRestrictObj } from '../utils';
 
 export const matchMap = new Map<string, Match>();
 
-export const matchModeMap: { [key in keyof typeof MatchMode]: ModeSetting } = {
+export const matchModeMap = createRestrictObj<Record<string, ModeSetting>>()({
     normal: {
         desc: '預設BP流程(單方 ban: 5, pick: 12)',
         flow: normalFlow,
@@ -39,9 +39,11 @@ export const matchModeMap: { [key in keyof typeof MatchMode]: ModeSetting } = {
         onRemove: BP_onRemove,
         onSelect: createOnSelect_ModeBP(testFlow),
     },
-};
+});
 
-export const defaultMatchMode = MatchMode.normal;
+export type MatchMode = keyof typeof matchModeMap;
 
-export { StageSetting, StageHeader, BPOption, BPEXOption, MatchMode, isBPStageSetting, isBPStageResult } from './types';
+export const defaultMatchMode: MatchMode = 'normal';
+
+export { StageSetting, StageHeader, BPOption, BPEXOption, isBPStageSetting, isBPStageResult } from './types';
 export { Match, MatchState } from './match';

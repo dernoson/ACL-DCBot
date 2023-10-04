@@ -1,10 +1,3 @@
-import { ChatInputCommandInteraction } from 'discord.js';
-import { CommandResult } from '../commandUtils';
-
-export interface I_Match {
-    select(ctx: ChatInputCommandInteraction, operators: string[]): CommandResult;
-}
-
 export type StageSetting<O extends string = string> = StageHeader<O> & {
     amount: number;
 };

@@ -1,22 +1,15 @@
 import { BaseGuildTextChannel, GuildMember, Role } from 'discord.js';
 import { botEnv, getAdminMention } from '../config/botSettings';
 import { createTimeoutHandler, TimeoutHandler, normalMentionOptions } from '../utils';
-import { MatchMode, StageHeader, StageSetting } from './types';
+import { StageHeader, StageSetting } from './types';
 import { CommandResult } from '../commandUtils';
 
 export class Match {
-    readonly channel: BaseGuildTextChannel;
-    readonly teams: Readonly<[Role, Role]>;
-    readonly matchMode: MatchMode;
     readonly stageResult: StageHeader[] = [];
     state = MatchState.prepare;
     timeoutHandler?: TimeoutHandler;
 
-    constructor(channel: BaseGuildTextChannel, teams: [Role, Role], matchMode: MatchMode) {
-        this.channel = channel;
-        this.teams = teams;
-        this.matchMode = matchMode;
-    }
+    constructor(readonly channel: BaseGuildTextChannel, readonly teams: [Role, Role], readonly matchMode: string) {}
 
     send(content: string) {
         return this.channel.send({ content, allowedMentions: normalMentionOptions });
@@ -33,12 +26,13 @@ export class Match {
     }
 
     setStart(flow: StageHeader[]) {
-        if (this.stageResult.length >= flow.length && this.state != MatchState.confirm) this.state = MatchState.complete;
+        if (this.stageResult.length >= flow.length) this.state = MatchState.complete;
+
         if (this.state != MatchState.pause && this.state != MatchState.prepare) return;
         this.state = MatchState.running;
+
         const BPTimeLimit = botEnv.get('BPTimeLimit');
         if (typeof BPTimeLimit != 'number') return '不限時間。';
-
         const teamName = this.getNowTeam().name;
         this.timeoutHandler = createTimeoutHandler(BPTimeLimit * 1000, () => {
             this.setPause();
