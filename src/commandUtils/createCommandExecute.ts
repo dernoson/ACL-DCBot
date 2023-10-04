@@ -1,7 +1,6 @@
-import { ApplicationCommandOptionType, ChatInputCommandInteraction } from 'discord.js';
+import { ApplicationCommandOptionType, ChatInputCommandInteraction, PermissionFlagsBits } from 'discord.js';
 import { CommandExecute, CommandFunction, CommandResult } from './types';
 import { logCommandResult, normalMentionOptions } from '../utils';
-import { botCanSendMessage } from '../permission';
 
 export const createCommandExecute = (fn: CommandFunction): CommandExecute => {
     return async (ctx) => {
@@ -39,4 +38,13 @@ const getCommandOptions = (options: ChatInputCommandInteraction['options']) => {
                 return { ...prev, [name]: optionValue.value };
         }
     }, {});
+};
+
+const botCanSendMessage = (ctx: ChatInputCommandInteraction) => {
+    if (!ctx.inGuild() || !ctx.guild || !ctx.channel) return false;
+    const { guild, channel } = ctx;
+    const selfMember = guild.members.me;
+    if (!selfMember?.permissions.has(PermissionFlagsBits.SendMessages)) return false;
+    if (!selfMember?.permissionsIn(channel).has(PermissionFlagsBits.SendMessages)) return false;
+    return true;
 };
