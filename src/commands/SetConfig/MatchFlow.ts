@@ -9,13 +9,13 @@ export const MatchFlow: ConfigOption = {
         if (!value) {
             botEnv.set('MatchFlow', undefined);
             dumpSetting();
-            return commandSuccessResp(`[設定機器人環境] 預設BP流程：${matchModeMap[defaultMatchMode].desc}`);
+            return commandSuccessResp(`預設BP流程：${matchModeMap[defaultMatchMode].desc}`);
         }
         const matchMode = matchModeMap[value];
         if (matchMode) {
             botEnv.set('MatchFlow', value);
             dumpSetting();
-            return commandSuccessResp(`[設定機器人環境] BP流程設置：${matchMode.desc}`);
+            return commandSuccessResp(`BP流程設置：${matchMode.desc}`);
         } else {
             throw `僅可接受以下字串值：\n${getObjectKeys(matchModeMap)
                 .map((key) => `\`${key}\` : ${matchModeMap[key].desc}`)

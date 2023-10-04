@@ -1,4 +1,5 @@
 import { BPTimeLimit } from './BPTimeLimit';
+import { BPTimeAlert } from './BPTimeAlert';
 import { MatchFlow } from './MatchFlow';
 import { ResponsePlugin } from './ResponsePlugin';
 import { checkAdminPermission, createRestrictObj, getObjectEntries } from '../../utils';
@@ -7,6 +8,7 @@ import { createCommand } from '../../commandUtils';
 
 const configOptions = createRestrictObj<Record<string, ConfigOption>>()({
     BPTimeLimit,
+    BPTimeAlert,
     MatchFlow,
     ResponsePlugin,
 });
