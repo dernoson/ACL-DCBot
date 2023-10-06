@@ -1,10 +1,10 @@
 import { Client, GatewayIntentBits, PermissionFlagsBits, REST, Routes } from 'discord.js';
 import { BotToken, BotClientID } from './secret/tokens';
-import { botEnv } from './config/botSettings';
+import { botEnv } from './BotEnv';
 import { matchMap } from './match';
 import { extraResponse } from './responses';
 import { Help, commandDefs, commandFunctions } from './commands';
-import { writeError } from './fileReader';
+import { writeError } from './fileHandlers';
 
 const helpCommandBuilder = Help.getBuilder();
 const requestDataBody = commandDefs.concat(helpCommandBuilder);
@@ -26,13 +26,13 @@ client.on('ready', async (client) => {
 });
 
 client.on('messageCreate', async (message) => {
-    if (!message.inGuild() || message.author.bot) return;
-    if (message.channelId == botEnv.logChannel?.id || matchMap.has(message.channelId)) return;
-    const selfMember = message.guild.members.me;
-    if (!selfMember?.permissions.has(PermissionFlagsBits.SendMessages)) return;
-    if (!selfMember?.permissionsIn(message.channel).has(PermissionFlagsBits.SendMessages)) return;
-
     try {
+        if (!message.inGuild() || message.author.bot) return;
+        if (message.channelId == botEnv.logChannel?.id || matchMap.has(message.channelId)) return;
+        const selfMember = message.guild.members.me;
+        if (!selfMember?.permissions.has(PermissionFlagsBits.SendMessages)) return;
+        if (!selfMember?.permissionsIn(message.channel).has(PermissionFlagsBits.SendMessages)) return;
+
         const resp = extraResponse(message);
         if (resp) await message.reply(resp);
     } catch (error) {
@@ -41,9 +41,9 @@ client.on('messageCreate', async (message) => {
 });
 
 client.on('interactionCreate', async (interaction) => {
-    if (!interaction.inGuild() || !interaction.isChatInputCommand()) return;
-
     try {
+        if (!interaction.inGuild() || !interaction.isChatInputCommand()) return;
+
         await interactionExecutes[interaction.commandName]?.(interaction);
     } catch (error) {
         writeError(error);

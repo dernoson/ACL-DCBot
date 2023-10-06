@@ -1,4 +1,5 @@
 import { BPTimeLimit } from './BPTimeLimit';
+import { BPTimeAlert } from './BPTimeAlert';
 import { MatchFlow } from './MatchFlow';
 import { ResponsePlugin } from './ResponsePlugin';
 import { checkAdminPermission, createRestrictObj, getObjectEntries } from '../../utils';
@@ -7,6 +8,7 @@ import { createCommand } from '../../commandUtils';
 
 const configOptions = createRestrictObj<Record<string, ConfigOption>>()({
     BPTimeLimit,
+    BPTimeAlert,
     MatchFlow,
     ResponsePlugin,
 });
@@ -21,5 +23,9 @@ export default createCommand('set_config', '[ 主辦方指令 ] 設定環境變�
     .option_String('value', '設定值')
     .callback((ctx, { option, value }) => {
         checkAdminPermission(ctx);
-        return configOptions[option].handler(ctx, value);
+        try {
+            return configOptions[option].handler(ctx, value);
+        } catch (error) {
+            throw `[ ${option} ] ${error}`;
+        }
     });

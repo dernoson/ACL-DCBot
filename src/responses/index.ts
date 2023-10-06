@@ -1,5 +1,5 @@
 import { Message } from 'discord.js';
-import { botEnv } from '../config/botSettings';
+import { botEnv } from '../BotEnv';
 import { MessageResponser } from './types';
 import { sellVegetable } from './sellVegetable';
 import { grapeFruitify } from './grapeFruitify';
@@ -14,12 +14,11 @@ export const extraResponse = (message: Message<true>) => {
     if (message.content.startsWith('\\')) return;
     if (message.content == '機器人閉嘴') return forceSilence();
     if (getSilenceState()) return;
-    const handler = responsePlugins[pluginKey]?.handler;
-    if (!handler) return;
-    return handler(message);
+
+    return responsePlugins[pluginKey]?.handler(message);
 };
 
-export const responsePlugins: { [key: string]: MessageResponser | undefined } = {
+export const responsePlugins: Record<string, MessageResponser> = {
     sellVegetable,
     grapeFruitify,
     chongyue,

@@ -1,5 +1,5 @@
 import { MessageResponser } from './types';
-import { getRandomInt } from './utils';
+import { getRandomInt } from '../utils';
 
 export const saileach: MessageResponser = {
     desc: '琴柳感(隨機回覆，20%機率)',

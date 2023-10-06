@@ -1,5 +1,5 @@
 import { BaseGuildTextChannel, ChannelType, Role } from 'discord.js';
-import { botEnv } from '../config/botSettings';
+import { botEnv } from '../BotEnv';
 import { Match, defaultMatchMode, matchMap, MatchMode, matchModeMap } from '../match';
 import { checkAdminPermission, checkSendMessagePermission, commandSuccessResp } from '../utils';
 import { clearMatchContent } from './MatchClear';

@@ -1,5 +1,5 @@
 import { TextChannel, EmbedBuilder } from 'discord.js';
-import { botEnv } from '../config/botSettings';
+import { botEnv } from '../BotEnv';
 import { matchMap, matchModeMap, MatchState } from '../match';
 import { checkAdminPermission } from '../utils';
 import { createCommand } from '../commandUtils';
@@ -14,7 +14,7 @@ export default createCommand('match_confirm', '[ 主辦方指令 ] 確認BP流�
         if (!match) throw '頻道非BP使用頻道';
         if (match.state != MatchState.complete) throw '頻道BP流程尚未處於可確認狀態';
 
-        match.state = MatchState.confirm;
+        matchMap.delete(channel.id);
         const result = `已確認 ${match.channel.name} 的BP流程`;
         if (!botEnv.logChannel) return result;
 

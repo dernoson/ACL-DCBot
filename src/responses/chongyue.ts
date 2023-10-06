@@ -1,5 +1,5 @@
 import { MessageResponser } from './types';
-import { getRandomInt } from './utils';
+import { getRandomInt } from '../utils';
 
 export const chongyue: MessageResponser = {
     desc: '很吵的龍(隨機回覆，20%機率)',

@@ -1,5 +1,5 @@
 import { GuildMember } from 'discord.js';
-import { getAdminMention } from '../config/botSettings';
+import { getAdminMention } from '../BotEnv';
 
 import { BP_onStart, BP_onRemove, BP_onSelect } from './bp';
 import { Match, ModeSetting } from './match';

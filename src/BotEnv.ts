@@ -10,7 +10,7 @@ import {
     TextChannel,
     User,
 } from 'discord.js';
-import { readJson, writeJson } from '../fileReader';
+import { readJson, writeJson } from './fileHandlers';
 
 class BotEnv {
     private guild?: Guild;

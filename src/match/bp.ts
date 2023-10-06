@@ -1,5 +1,5 @@
 import { GuildMember, roleMention } from 'discord.js';
-import { getAdminMention } from '../config/botSettings';
+import { getAdminMention } from '../BotEnv';
 import { Match, ModeSetting } from './match';
 import { BPOption, StageSetting, calcFlowTotal, BPStageResult, isBPStageResult } from './types';
 
