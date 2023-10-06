@@ -1,6 +1,6 @@
 import { getObjectKeys } from '../utils';
 import { MessageResponser } from './types';
-import { getRandomInt } from './utils';
+import { getRandomInt } from '../utils';
 
 export const sellVegetable: MessageResponser = {
     desc: '治賣菜專用(關鍵字：菜/寄/佬/禿)',

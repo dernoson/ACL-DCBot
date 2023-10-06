@@ -1,5 +1,5 @@
 import { MessageResponser } from './types';
-import { getRandomInt } from './utils';
+import { getRandomInt } from '../utils';
 
 export const shadow: MessageResponser = {
     desc: '天佑拉華純特32(關鍵字：演)',
