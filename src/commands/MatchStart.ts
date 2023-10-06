@@ -28,7 +28,7 @@ const setMatchStart = (match: Match, force?: boolean) => {
     const lastState = match.state;
     if (lastState != MatchState.prepare && lastState != MatchState.pause) return false;
 
-    match.timeoutHandler?.cancel();
+    match.cancelTimeout();
     const modeSetting = matchModeMap[match.matchMode];
     const result = modeSetting.logTotal(match) + modeSetting.onStart(match);
 
@@ -39,7 +39,7 @@ const setMatchStart = (match: Match, force?: boolean) => {
 
     if (lastState == MatchState.prepare && !force) {
         match.send(beforeStartDesc + '選角流程將於 3 分鐘後開始，請主辦方與參賽方做好準備。');
-        match.timeoutHandler = createTimeoutHandler(180 * 1000, () => {
+        match.prepareTimeoutHandler = createTimeoutHandler(180 * 1000, () => {
             match.send(result + match.setStart(modeSetting.flow));
         });
     } else if (lastState == MatchState.pause) {

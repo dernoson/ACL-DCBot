@@ -30,7 +30,7 @@ export default createCommand('match_clear', '[ 主辦方指令 ] 清除BP流程'
     });
 
 export const clearMatchContent = (match: Match) => {
-    match.timeoutHandler?.cancel();
+    match.cancelTimeout();
     const modeSetting = matchModeMap[match.matchMode];
     for (let i = 0; i < match.stageResult.length; i++) modeSetting.onRemove(match);
     matchMap.delete(match.channel.id);

@@ -7,7 +7,9 @@ import { CommandResult } from '../commandUtils';
 export class Match {
     readonly stageResult: StageHeader[] = [];
     state = MatchState.prepare;
+    prepareTimeoutHandler?: TimeoutHandler;
     timeoutHandler?: TimeoutHandler;
+    private alertTimeoutHandler?: TimeoutHandler;
 
     constructor(readonly channel: BaseGuildTextChannel, readonly teams: [Role, Role], readonly matchMode: string) {}
 
@@ -39,7 +41,22 @@ export class Match {
             this.send(`選擇角色超時，已暫停流程，請 ${getAdminMention()} 進行處理中`);
             botEnv.log(`> ${teamName} 於 ${this.channel.name} 選角超時。`);
         });
+
+        const BPTimeAlert = botEnv.get('BPTimeAlert');
+        const timeLimitDiff = BPTimeLimit - 30;
+        if (BPTimeAlert && timeLimitDiff > 60) {
+            this.alertTimeoutHandler = createTimeoutHandler(timeLimitDiff * 1000, () => {
+                this.send(`尚餘30秒`);
+            });
+        }
+
         return `限時 ${BPTimeLimit} 秒。`;
+    }
+
+    cancelTimeout() {
+        this.timeoutHandler?.cancel();
+        this.alertTimeoutHandler?.cancel();
+        this.prepareTimeoutHandler?.cancel();
     }
 }
 
