@@ -1,11 +1,11 @@
 import { TextChannel } from 'discord.js';
 import { matchMap, matchModeMap, MatchState } from '../match';
-import { checkAdminPermission } from '../utils';
 import { createCommand } from '../commandUtils';
+import { assertAdminPermission } from '../BotEnv';
 
 export default createCommand('match_laststep', '[ 主辦方指令 ] 回復BP流程至上一個步驟') //
     .callback((ctx) => {
-        checkAdminPermission(ctx);
+        assertAdminPermission(ctx);
 
         const { channel } = ctx;
         if (!(channel instanceof TextChannel)) throw '指定頻道非純文字頻道';

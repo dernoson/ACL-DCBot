@@ -1,6 +1,7 @@
 import { botEnv, dumpSetting } from '../../BotEnv';
+import { commandSuccessResp } from '../../functions';
 import { defaultMatchMode, matchModeMap } from '../../match';
-import { commandSuccessResp, getObjectKeys } from '../../utils';
+import { getObjectKeys } from '../../utils';
 import { ConfigOption } from './types';
 
 export const MatchFlow: ConfigOption = {

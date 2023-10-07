@@ -68,6 +68,14 @@ export const getSetting = () => botSettings;
 
 export const getAdminMention = () => (botEnv.admin ? roleMention(botEnv.admin.id) : '伺服器管理員');
 
+export const logCommandResult = (commandName: string, option: 'success' | 'fail', username: string, content: string) => {
+    botEnv.log(`> **[ ${commandName} ] ${option}**\n\`by ${username} at <${new Date()}>\`\n${content}`);
+};
+
+export const assertAdminPermission = (ctx: ChatInputCommandInteraction) => {
+    if (!botEnv.hasAdminPermission(ctx.member)) throw '並非主辦方，無法使用該指令';
+};
+
 export const botEnv = new BotEnv();
 
 let botSettings: Record<string, unknown>;

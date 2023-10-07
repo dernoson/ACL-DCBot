@@ -43,7 +43,6 @@ client.on('messageCreate', async (message) => {
 client.on('interactionCreate', async (interaction) => {
     try {
         if (!interaction.inGuild() || !interaction.isChatInputCommand()) return;
-
         await interactionExecutes[interaction.commandName]?.(interaction);
     } catch (error) {
         writeError(error);

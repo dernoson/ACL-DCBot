@@ -1,8 +1,9 @@
 import { BaseGuildTextChannel, GuildMember, Role } from 'discord.js';
 import { botEnv, getAdminMention } from '../BotEnv';
-import { createTimeoutHandler, TimeoutHandler, normalMentionOptions } from '../utils';
+import { createTimeoutHandler, TimeoutHandler } from '../utils';
 import { StageHeader, StageSetting } from './types';
 import { CommandResult } from '../commandUtils';
+import { normalMentionOptions } from '../mentionOption';
 
 export class Match {
     readonly stageResult: StageHeader[] = [];

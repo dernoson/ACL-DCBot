@@ -1,13 +1,14 @@
 import { ChannelType, TextChannel } from 'discord.js';
 import { Match, matchMap, matchModeMap } from '../match';
-import { checkAdminPermission, commandSuccessResp } from '../utils';
 import { createCommand } from '../commandUtils';
+import { assertAdminPermission } from '../BotEnv';
+import { commandSuccessResp } from '../functions';
 
 export default createCommand('match_clear', '[ 主辦方指令 ] 清除BP流程')
     .option_Channel('channel', '選擇欲清除的BP使用頻道，未填選時，視為選擇使用該指令的當前頻道', false, [ChannelType.GuildText])
     .option_Boolean('all', '選填該選項為True時，無視channel指定，清空所有BP頻道指定')
     .callback((ctx, { channel, all }) => {
-        checkAdminPermission(ctx);
+        assertAdminPermission(ctx);
         if (all) {
             const clearedMatchName: string[] = [];
             matchMap.forEach((match) => {

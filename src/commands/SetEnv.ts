@@ -1,7 +1,7 @@
 import { BaseGuildTextChannel, channelMention, ChannelType, GuildMember, PermissionFlagsBits, Role, roleMention } from 'discord.js';
 import { botEnv, dumpSetting } from '../BotEnv';
-import { checkSendMessagePermission } from '../utils';
 import { createCommand } from '../commandUtils';
+import { hasSendMessagePermission } from '../functions';
 
 export default createCommand('set_env', '[ 管理員指令 ] 設定主辦權限身分組，以及設定機器人log頻道')
     .option_Role('admin_role', '設定主辦權限身分組，當未設定時，主辦權限設為管理員權限')
@@ -13,7 +13,7 @@ export default createCommand('set_env', '[ 管理員指令 ] 設定主辦權限�
 
         const admin = admin_role instanceof Role ? admin_role : undefined;
         const logChannel = log_channel instanceof BaseGuildTextChannel ? log_channel : undefined;
-        if (logChannel && (!ctx.guild || !checkSendMessagePermission(ctx.guild, logChannel)))
+        if (logChannel && (!ctx.guild || !hasSendMessagePermission(ctx.guild, logChannel)))
             throw '機器人在伺服器或指定頻道中並無發送訊息權限，請確認伺服器設定';
         botEnv.admin = admin;
         botEnv.logChannel = logChannel;

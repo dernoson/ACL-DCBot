@@ -1,6 +1,6 @@
 import { botEnv, dumpSetting } from '../../BotEnv';
+import { commandSuccessResp } from '../../functions';
 import { responsePlugins } from '../../responses';
-import { commandSuccessResp } from '../../utils';
 import { ConfigOption } from './types';
 
 export const ResponsePlugin: ConfigOption = {

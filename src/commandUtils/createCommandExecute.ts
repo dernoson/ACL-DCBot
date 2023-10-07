@@ -1,11 +1,15 @@
-import { ApplicationCommandOptionType, ChatInputCommandInteraction, PermissionFlagsBits } from 'discord.js';
+import { ApplicationCommandOptionType, ChatInputCommandInteraction } from 'discord.js';
 import { CommandExecute, CommandFunction, CommandResult } from './types';
-import { logCommandResult, normalMentionOptions } from '../utils';
+import { logCommandResult } from '../BotEnv';
+import { normalMentionOptions } from '../mentionOption';
+import { hasSendMessagePermission } from '../functions';
 
 export const createCommandExecute = (fn: CommandFunction): CommandExecute => {
     return async (ctx) => {
-        if (!botCanSendMessage(ctx)) return;
+        if (!ctx.inGuild() || !ctx.guild || !ctx.channel) return;
+        if (!hasSendMessagePermission(ctx.guild, ctx.channel)) return;
         const { options, commandName, user } = ctx;
+
         try {
             const result = fn(ctx, getCommandOptions(options));
             const replyOption: Exclude<CommandResult, string> = typeof result == 'string' ? { content: result } : result;
@@ -13,9 +17,13 @@ export const createCommandExecute = (fn: CommandFunction): CommandExecute => {
             log && logCommandResult(commandName, 'success', user.username, log);
             await ctx.reply({ allowedMentions: normalMentionOptions, ...replyOption });
         } catch (error) {
-            if (!(typeof error == 'string')) throw error;
-            logCommandResult(commandName, 'fail', user.username, error);
-            await ctx.reply({ content: '！！！指令失敗！！！\n' + error, ephemeral: true });
+            if (!(typeof error == 'string')) {
+                await ctx.reply({ content: '擺爛啦！德諾索又要修機器人啦', ephemeral: true });
+                throw error;
+            } else {
+                logCommandResult(commandName, 'fail', user.username, error);
+                await ctx.reply({ content: '！！！指令失敗！！！\n' + error, ephemeral: true });
+            }
         }
     };
 };
@@ -38,13 +46,4 @@ const getCommandOptions = (options: ChatInputCommandInteraction['options']) => {
                 return { ...prev, [name]: optionValue.value };
         }
     }, {});
-};
-
-const botCanSendMessage = (ctx: ChatInputCommandInteraction) => {
-    if (!ctx.inGuild() || !ctx.guild || !ctx.channel) return false;
-    const { guild, channel } = ctx;
-    const selfMember = guild.members.me;
-    if (!selfMember?.permissions.has(PermissionFlagsBits.SendMessages)) return false;
-    if (!selfMember?.permissionsIn(channel).has(PermissionFlagsBits.SendMessages)) return false;
-    return true;
 };

@@ -1,12 +1,11 @@
 import { TextChannel, EmbedBuilder } from 'discord.js';
-import { botEnv } from '../BotEnv';
+import { assertAdminPermission, botEnv } from '../BotEnv';
 import { matchMap, matchModeMap, MatchState } from '../match';
-import { checkAdminPermission } from '../utils';
 import { createCommand } from '../commandUtils';
 
 export default createCommand('match_confirm', '[ 主辦方指令 ] 確認BP流程') //
     .callback((ctx) => {
-        checkAdminPermission(ctx);
+        assertAdminPermission(ctx);
 
         const { channel } = ctx;
         if (!(channel instanceof TextChannel)) throw '指定頻道非純文字頻道';
