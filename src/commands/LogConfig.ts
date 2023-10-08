@@ -1,10 +1,9 @@
-import { getSetting } from '../BotEnv';
-import { checkAdminPermission } from '../utils';
+import { assertAdminPermission, getSetting } from '../BotEnv';
 import { createCommand } from '../commandUtils';
 
 export default createCommand('log_config', '[ 主辦方指令 ] 輸出機器人設定值') //
     .callback((ctx) => {
-        checkAdminPermission(ctx);
+        assertAdminPermission(ctx);
         const botSettings = getSetting();
         return {
             content: Object.getOwnPropertyNames(botSettings)

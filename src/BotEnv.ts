@@ -20,11 +20,10 @@ class BotEnv {
     async onBotReady(client: Client<true>) {
         this.guild = client.guilds.cache.first();
         botSettings = await readJson('config.json', () => ({}));
-        if (!this.guild) throw 'Have no guild';
         this.admin = this.getRole('Admin');
         this.logChannel = this.getTextChannel('LogChannel');
-        console.log('主辦方身分組指定: ', this.admin?.name);
-        console.log('機器人log頻道指定: ', this.logChannel?.name);
+        console.log('主辦方身分組指定:', this.admin?.name ?? '無');
+        console.log('機器人log頻道指定:', this.logChannel?.name ?? '無');
     }
 
     async log(content: string) {
@@ -50,9 +49,9 @@ class BotEnv {
         if (channel instanceof TextChannel) return channel;
     }
 
-    set(key: string, value: unknown) {
-        if (value instanceof Role || value instanceof TextChannel || value instanceof User) botSettings[key] = value.id;
-        else botSettings[key] = value;
+    set(key: string, value: string | number | undefined) {
+        botSettings[key] = value;
+        writeJson(botSettings, 'config.json');
     }
 
     get(key: string) {
@@ -60,13 +59,17 @@ class BotEnv {
     }
 }
 
-export const dumpSetting = () => {
-    writeJson(botSettings, 'config.json');
-};
-
 export const getSetting = () => botSettings;
 
 export const getAdminMention = () => (botEnv.admin ? roleMention(botEnv.admin.id) : '伺服器管理員');
+
+export const logCommandResult = (commandName: string, option: 'success' | 'fail', username: string, content: string) => {
+    botEnv.log(`> **[ ${commandName} ] ${option}**\n\`by ${username} at <${new Date()}>\`\n${content}`);
+};
+
+export const assertAdminPermission = (ctx: ChatInputCommandInteraction) => {
+    if (!botEnv.hasAdminPermission(ctx.member)) throw '並非主辦方，無法使用該指令';
+};
 
 export const botEnv = new BotEnv();
 
