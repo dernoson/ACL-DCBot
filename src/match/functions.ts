@@ -1,11 +1,14 @@
 import { roleMention } from 'discord.js';
 import { createLogString } from '../utils';
 import { I_MatchStorage, MatchState, StepHeader } from './types';
-import { clearMatchReg } from './matchStorage';
+import { clearMatchReg, removeMatchTimeout } from './matchStorage';
 
 export const checkMatchComplete = (flow: StepHeader[], storage: I_MatchStorage): boolean => {
     const result = storage.stepStorage.length == flow.length;
-    if (result) storage.state = MatchState.complete;
+    if (result) {
+        storage.state = MatchState.complete;
+        removeMatchTimeout(storage.channel);
+    }
     return result;
 };
 
