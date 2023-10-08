@@ -1,16 +1,6 @@
-export const onTimeout = (key: string, timeLimitMs: number, onTimeout: () => any) => {
-    removeTimeout(key);
-    handlerTable.set(key, createTimeoutHandler(timeLimitMs, onTimeout));
-};
-
-export const removeTimeout = (key: string) => {
-    handlerTable.get(key)?.cancel();
-    handlerTable.delete(key);
-};
-
 export const createTimeoutHandler = (timeLimitMs: number, onTimeout: () => any): TimeoutHandler => {
     let isCanceled = false;
-    setTimeout(() => !isCanceled && onTimeout(), timeLimitMs);
+    setTimeout(() => !isCanceled && onTimeout(), Math.max(timeLimitMs, 0));
     return { cancel: () => (isCanceled = true) };
 };
 

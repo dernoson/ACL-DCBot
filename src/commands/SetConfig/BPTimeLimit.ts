@@ -1,4 +1,4 @@
-import { botEnv, dumpSetting } from '../../BotEnv';
+import { botEnv } from '../../BotEnv';
 import { commandSuccessResp } from '../../functions';
 import { ConfigOption } from './types';
 
@@ -7,7 +7,6 @@ export const BPTimeLimit: ConfigOption = {
     handler(ctx, value) {
         if (!value) {
             botEnv.set('BPTimeLimit', undefined);
-            dumpSetting();
             return commandSuccessResp('BP選角時限秒數：不限');
         } else if (isNaN(+value)) {
             throw '僅可輸入純數字';
@@ -16,7 +15,6 @@ export const BPTimeLimit: ConfigOption = {
         } else {
             const second = +value;
             botEnv.set('BPTimeLimit', second);
-            dumpSetting();
             return commandSuccessResp(`BP選角時限秒數： ${second} 秒`);
         }
     },

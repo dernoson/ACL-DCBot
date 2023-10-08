@@ -1,6 +1,6 @@
 import { TextChannel, EmbedBuilder } from 'discord.js';
 import { assertAdminPermission, botEnv } from '../BotEnv';
-import { matchMap, matchModeMap, MatchState } from '../match';
+import { dumpMatchStorage, getMatchStorage, I_MatchHandlers, matchModeMap, MatchState, removeMatchStorage } from '../match';
 import { createCommand } from '../commandUtils';
 
 export default createCommand('match_confirm', '[ 主辦方指令 ] 確認BP流程') //
@@ -8,28 +8,31 @@ export default createCommand('match_confirm', '[ 主辦方指令 ] 確認BP流�
         assertAdminPermission(ctx);
 
         const { channel } = ctx;
-        if (!(channel instanceof TextChannel)) throw '指定頻道非純文字頻道';
-        const match = matchMap.get(channel.id);
-        if (!match) throw '頻道非BP使用頻道';
-        if (match.state != MatchState.complete) throw '頻道BP流程尚未處於可確認狀態';
+        if (!(channel instanceof TextChannel)) throw '無法找到頻道';
+        const storage = getMatchStorage(channel);
+        if (!storage) throw '頻道非BP使用頻道';
+        if (storage.state != MatchState.complete) throw '頻道BP流程尚未處於可確認狀態';
 
-        matchMap.delete(channel.id);
-        const result = `已確認 ${match.channel.name} 的BP流程`;
-        if (!botEnv.logChannel) return result;
+        removeMatchStorage(channel);
 
-        const [teamA, teamB] = match.teams;
-        const embed = new EmbedBuilder()
-            .setTitle(`${teamA.name} vs ${teamB.name}`)
-            .setAuthor({ name: ctx.user.username })
-            .setDescription('BP流程確認')
-            .addFields({
-                name: '流程結果',
-                value: matchModeMap[match.matchMode].logTotal(match),
-            })
-            .setFooter({ text: `於 ${match.channel.name}` })
-            .setTimestamp()
-            .setColor('DarkAqua');
+        if (botEnv.logChannel) {
+            const { teams } = storage;
+            const embed = new EmbedBuilder()
+                .setTitle(`${teams[0].name} vs ${teams[1].name}`)
+                .setAuthor({ name: ctx.user.username })
+                .setDescription('BP流程確認')
+                .addFields({
+                    name: '流程結果',
+                    value: (matchModeMap[storage.matchMode] as I_MatchHandlers).logTotal(storage),
+                })
+                .setFooter({ text: `於 ${channel.name}` })
+                .setTimestamp()
+                .setColor('DarkAqua');
 
-        botEnv.logChannel.send({ embeds: [embed] });
-        return result;
+            botEnv.logChannel.send({ embeds: [embed] });
+        }
+
+        dumpMatchStorage();
+
+        return `已確認 ${channel.name} 的BP流程`;
     });

@@ -1,47 +1,29 @@
-export type StageSetting<O extends string = string> = StageHeader<O> & {
-    amount: number;
-};
+import { BaseGuildTextChannel, GuildMember, Role } from 'discord.js';
+import { CommandResult } from '../commandUtils';
 
-export type StageHeader<O extends string = string> = {
-    option: O;
-};
-
-export type BPOption = (typeof BPOptionKeys)[number];
-
-export const BPOptionKeys = ['ban', 'pick'] as const;
-
-export const isBPStageSetting = (stage: StageSetting): stage is StageSetting<BPOption> => BPOptionKeys.includes(stage.option as BPOption);
-
-export type BPStageResult = StageHeader<BPOption> & {
-    operators: string[];
-};
-
-export const isBPStageResult = (stage: StageHeader): stage is BPStageResult => BPOptionKeys.includes(stage.option as BPOption);
-
-export type BPEXOption = (typeof BPEXOptionKeys)[number];
-
-export const BPEXOptionKeys = ['ban', 'pick', 'exchange'] as const;
-
-export const isBPEXStageSetting = (stage: StageSetting): stage is StageSetting<BPOption> => BPEXOptionKeys.includes(stage.option as BPEXOption);
-
-export type BPEXStageResult =
-    | BPStageResult
-    | (StageHeader<'exchange'> & {
-          operators: [string[], string[]];
-      });
-
-export const isBPEXStageResult = (stage: StageHeader): stage is BPEXStageResult => BPEXOptionKeys.includes(stage.option as BPEXOption);
-
-export enum MatchMode {
-    normal = 'normal',
-    exchange = 'exchange',
-    testExchange = 'testExchange',
-    test = 'test',
+export interface I_MatchStorage<S extends StepHeader = StepHeader> {
+    state: MatchState;
+    readonly channel: BaseGuildTextChannel;
+    readonly teams: [Role, Role];
+    readonly matchMode: string;
+    readonly stepStorage: S[];
 }
 
-export const calcFlowTotal = (flow: StageSetting[]): { [key: string]: number } => {
-    return flow.reduce(
-        (prev, stageSetting) => ({ ...prev, [stageSetting.option]: (prev[stageSetting.option] || 0) + stageSetting.amount }),
-        {}
-    );
+export interface I_MatchHandlers<S extends StepHeader<string> = StepHeader<string>> {
+    desc: string;
+    flow: StepHeader[];
+    logTotal: (storage: I_MatchStorage<S>) => string;
+    onStart: (storage: I_MatchStorage<S>) => CommandResult;
+    onRemove: (storage: I_MatchStorage<S>) => CommandResult;
+    onSelect: (storage: I_MatchStorage<S>, operators: string[], member: GuildMember) => CommandResult;
+}
+
+export const enum MatchState {
+    running,
+    pause,
+    complete,
+}
+
+export type StepHeader<O extends string = string> = {
+    option: O;
 };

@@ -1,4 +1,4 @@
-import { botEnv, dumpSetting } from '../../BotEnv';
+import { botEnv } from '../../BotEnv';
 import { commandSuccessResp } from '../../functions';
 import { ConfigOption } from './types';
 
@@ -7,7 +7,6 @@ export const BPTimeAlert: ConfigOption = {
     handler(ctx, value) {
         if (!value) {
             botEnv.set('BPTimeAlert', undefined);
-            dumpSetting();
             return commandSuccessResp('BP選角時限提醒：關閉');
         } else if (isNaN(+value)) {
             throw '僅可輸入純數字';
@@ -22,7 +21,6 @@ export const BPTimeAlert: ConfigOption = {
         } else {
             const second = +value;
             botEnv.set('BPTimeAlert', second);
-            dumpSetting();
             return commandSuccessResp(`BP選角時限提醒： ${second} 秒前提醒`);
         }
     },

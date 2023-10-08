@@ -1,7 +1,7 @@
-import { Client, GatewayIntentBits, PermissionFlagsBits, REST, Routes } from 'discord.js';
+import { BaseGuildTextChannel, Client, GatewayIntentBits, PermissionFlagsBits, REST, Routes } from 'discord.js';
 import { BotToken, BotClientID } from './secret/tokens';
 import { botEnv } from './BotEnv';
-import { matchMap } from './match';
+import { getMatchStorage, recoverMatchStorage } from './match';
 import { extraResponse } from './responses';
 import { Help, commandDefs, commandFunctions } from './commands';
 import { writeError } from './fileHandlers';
@@ -21,14 +21,18 @@ const client = new Client({
 });
 
 client.on('ready', async (client) => {
-    console.log(`Logged in as ${client.user.tag}!`);
     await botEnv.onBotReady(client);
+    await recoverMatchStorage(client);
+    console.log(`Logged in as ${client.user.tag}!`);
+    envIsReady = true;
 });
 
 client.on('messageCreate', async (message) => {
     try {
+        if (!envIsReady) return;
         if (!message.inGuild() || message.author.bot) return;
-        if (message.channelId == botEnv.logChannel?.id || matchMap.has(message.channelId)) return;
+        if (message.channelId == botEnv.logChannel?.id) return;
+        if (message.channel instanceof BaseGuildTextChannel && getMatchStorage(message.channel)) return;
         const selfMember = message.guild.members.me;
         if (!selfMember?.permissions.has(PermissionFlagsBits.SendMessages)) return;
         if (!selfMember?.permissionsIn(message.channel).has(PermissionFlagsBits.SendMessages)) return;
@@ -43,6 +47,7 @@ client.on('messageCreate', async (message) => {
 client.on('interactionCreate', async (interaction) => {
     try {
         if (!interaction.inGuild() || !interaction.isChatInputCommand()) return;
+        if (!envIsReady) await interaction.reply('機器人尚未就緒');
         await interactionExecutes[interaction.commandName]?.(interaction);
     } catch (error) {
         writeError(error);
@@ -50,3 +55,5 @@ client.on('interactionCreate', async (interaction) => {
 });
 
 client.login(BotToken);
+
+let envIsReady = false;

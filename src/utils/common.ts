@@ -9,3 +9,15 @@ export const createRestrictObj = <T>() => {
 };
 
 export const getRandomInt = (range?: number) => Math.floor(Math.random() * (range || 1));
+
+export const getMapValue = <K, V>(map: Map<K, V>, key: K, init: (key: K) => V): V => {
+    if (!map.has(key)) {
+        const newValue = init(key);
+        map.set(key, newValue);
+        return newValue;
+    } else {
+        return map.get(key) as V;
+    }
+};
+
+export const createLogString = (...strs: (string | undefined)[]) => strs.filter((str) => typeof str == 'string').join('\n');
