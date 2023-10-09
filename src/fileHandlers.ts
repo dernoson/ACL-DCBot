@@ -4,7 +4,7 @@ import { MutualLock, createMutualLock } from './utils';
 
 export const writeError = (error: any) => {
     const filename = 'errorLog-' + dayjs().format('YYYY-MM-DD_HH-mm-ss') + '.json';
-    console.log('ERROR:', filename);
+    console.log(error);
     writeJson(error, filename);
 };
 

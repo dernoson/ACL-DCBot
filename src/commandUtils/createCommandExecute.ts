@@ -1,13 +1,10 @@
 import { ApplicationCommandOptionType, ChatInputCommandInteraction } from 'discord.js';
 import { CommandExecute, CommandFunction, CommandResult } from './types';
-import { logCommandResult } from '../BotEnv';
-import { normalMentionOptions } from '../mentionOption';
-import { hasSendMessagePermission } from '../functions';
+import { normalMentionOptions } from '../consts';
+import { logCommandResult } from '../config';
 
 export const createCommandExecute = (fn: CommandFunction): CommandExecute => {
     return async (ctx) => {
-        if (!ctx.inGuild() || !ctx.guild || !ctx.channel) return;
-        if (!hasSendMessagePermission(ctx.guild, ctx.channel)) return;
         const { options, commandName, user } = ctx;
 
         try {
@@ -17,12 +14,12 @@ export const createCommandExecute = (fn: CommandFunction): CommandExecute => {
             log && logCommandResult(commandName, 'success', user.username, log);
             await ctx.reply({ allowedMentions: normalMentionOptions, ...replyOption });
         } catch (error) {
-            if (!(typeof error == 'string')) {
-                await ctx.reply({ content: '擺爛啦！德諾索又要修機器人啦', ephemeral: true });
-                throw error;
-            } else {
+            if (typeof error == 'string') {
                 logCommandResult(commandName, 'fail', user.username, error);
                 await ctx.reply({ content: '！！！指令失敗！！！\n' + error, ephemeral: true });
+            } else {
+                await ctx.reply({ content: '擺爛啦！德諾索又要修機器人啦', ephemeral: true });
+                throw error;
             }
         }
     };

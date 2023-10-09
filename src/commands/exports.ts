@@ -10,7 +10,18 @@ import SetConfig from './SetConfig';
 import Select from './Select';
 import { CommandExecute } from '../commandUtils';
 
-const commands = [Select, MatchSet, MatchStart, MatchClear, MatchConfirm, MatchLaststep, LogMatch, SetEnv, LogConfig, SetConfig];
+const commands = [
+    Select, //
+    MatchSet,
+    MatchStart,
+    MatchClear,
+    MatchConfirm,
+    MatchLaststep,
+    LogMatch,
+    SetEnv,
+    LogConfig,
+    SetConfig,
+];
 
 export const commandDefs = commands.map((command) => command.getBuilder());
 

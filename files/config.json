@@ -1,6 +1,7 @@
 {
-    "Admin": "1064771833347448832",
-    "LogChannel": "1072888724406415431",
-    "BPTimeLimit": 180,
-    "BPTimeAlert": 30
+	"Admin": "1064771833347448832",
+	"LogChannel": "1072888724406415431",
+	"BPTimeLimit": 180,
+	"BPTimeAlert": 30,
+	"MatchFlow": "2"
 }

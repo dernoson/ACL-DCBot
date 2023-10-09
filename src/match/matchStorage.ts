@@ -1,9 +1,10 @@
-import { BaseGuildTextChannel, Client, Role } from 'discord.js';
-import { I_MatchStorage, MatchState } from './types';
+import { BaseGuildTextChannel, Role } from 'discord.js';
+import { I_MatchStorage, MatchMode, MatchState } from './types';
 import { TimeoutHandler, createTimeoutHandler, getMapValue, getObjectEntries } from '../utils';
 import { readJson, writeJson } from '../fileHandlers';
+import { getEnv } from '../config';
 
-export const createMatchStorage = (channel: BaseGuildTextChannel, teams: [Role, Role], matchMode: string) => {
+export const createMatchStorage = (channel: BaseGuildTextChannel, teams: [Role, Role], matchMode: MatchMode) => {
     const storage: I_MatchStorage = {
         channel,
         teams,
@@ -12,6 +13,7 @@ export const createMatchStorage = (channel: BaseGuildTextChannel, teams: [Role, 
         stepStorage: [],
     };
     matchStorageTable.set(channel.id, storage);
+    dumpMatchStorage();
     return storage;
 };
 
@@ -26,19 +28,7 @@ export const getAllMatchStorage = () => {
 export const removeMatchStorage = (channel: BaseGuildTextChannel) => {
     clearMatchReg(channel);
     matchStorageTable.delete(channel.id);
-};
-
-export const clearMatchStorage = (): BaseGuildTextChannel[] => {
-    const removedChannels: BaseGuildTextChannel[] = [];
-
-    matchStorageTable.forEach(({ channel }) => {
-        removedChannels.push(channel);
-        clearMatchReg(channel);
-    });
-
-    matchStorageTable.clear();
-
-    return removedChannels;
+    dumpMatchStorage();
 };
 
 export const dumpMatchStorage = async () => {
@@ -57,8 +47,8 @@ export const dumpMatchStorage = async () => {
     await writeJson(file, 'match.json');
 };
 
-export const recoverMatchStorage = async (client: Client<true>) => {
-    const guild = client.guilds.cache.first();
+export const recoverMatchStorage = async () => {
+    const { guild } = getEnv();
     if (!guild) return;
     const file = await readJson<Record<string, any>>('match.json', () => ({}));
     matchStorageTable.clear();
@@ -110,6 +100,6 @@ export const clearMatchReg = (channel: BaseGuildTextChannel) => {
 
 const timeoutHandlerTable = new Map<string, Map<string, TimeoutHandler>>();
 
-const matchStorageTable = new Map<string, I_MatchStorage>();
+const matchStorageTable = new Map<string, I_MatchStorage<any>>();
 
 const cacheTable = new Map<string, Map<string, unknown>>();
