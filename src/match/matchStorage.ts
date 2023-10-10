@@ -31,7 +31,7 @@ export const createMatchStorage = (channel: BaseGuildTextChannel, teams: [Role, 
     });
 
     teams.forEach((team) => {
-        channel.permissionOverwrites.create(team, channelPermission);
+        channel.permissionOverwrites.create(team, channelPermission).catch((error) => console.log(error));
     });
 
     matchStorageTable.set(channel.id, storage);
@@ -62,7 +62,7 @@ export const removeMatchStorage = (channel: BaseGuildTextChannel) => {
     });
 
     teams.forEach((team) => {
-        channel.permissionOverwrites.delete(team);
+        channel.permissionOverwrites.delete(team).catch((error) => console.log(error));
     });
 
     clearMatchReg(channel);
