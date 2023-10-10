@@ -2,6 +2,7 @@ import { BaseGuildTextChannel, Role } from 'discord.js';
 import { I_MatchStorage, MatchMode, MatchState } from './types';
 import { TimeoutHandler, createTimeoutHandler, getMapValue, getObjectEntries } from '../utils';
 import { readJson, writeJson } from '../fileHandlers';
+import { channelPermission } from '../consts';
 import { getEnv } from '../config';
 
 export const createMatchStorage = (channel: BaseGuildTextChannel, teams: [Role, Role], matchMode: MatchMode) => {
@@ -11,7 +12,28 @@ export const createMatchStorage = (channel: BaseGuildTextChannel, teams: [Role, 
         matchMode,
         state: MatchState.pause,
         stepStorage: [],
+        restRoles: {},
     };
+
+    channel.guild.members.fetch().then((members) => {
+        members.forEach((member) => {
+            teams.forEach((team) => {
+                const memberRoles = member.roles.cache;
+                if (!memberRoles.has(team.id)) return;
+
+                storage.restRoles[member.id] = [...memberRoles.keys()].filter((id) => id != team.id);
+
+                member.roles.set([team]).catch((error) => console.log(error));
+            });
+        });
+
+        dumpMatchStorage();
+    });
+
+    teams.forEach((team) => {
+        channel.permissionOverwrites.create(team, channelPermission);
+    });
+
     matchStorageTable.set(channel.id, storage);
     dumpMatchStorage();
     return storage;
@@ -26,6 +48,23 @@ export const getAllMatchStorage = () => {
 };
 
 export const removeMatchStorage = (channel: BaseGuildTextChannel) => {
+    const storage = getMatchStorage(channel);
+    if (!storage) return;
+    const { teams, restRoles } = storage;
+
+    channel.guild.members.fetch().then((members) => {
+        members.forEach((member) => {
+            const restRole = restRoles[member.id];
+            if (!restRole) return;
+
+            member.roles.add(restRole).catch((error) => console.log(error));
+        });
+    });
+
+    teams.forEach((team) => {
+        channel.permissionOverwrites.delete(team);
+    });
+
     clearMatchReg(channel);
     matchStorageTable.delete(channel.id);
     dumpMatchStorage();
@@ -38,6 +77,7 @@ export const dumpMatchStorage = async () => {
             [storage.channel.id]: {
                 matchMode: storage.matchMode,
                 stepStorage: storage.stepStorage,
+                restRoles: storage.restRoles,
                 channel: storage.channel.id,
                 teams: storage.teams.map((role) => role.id),
             },
@@ -56,6 +96,7 @@ export const recoverMatchStorage = async () => {
         matchStorageTable.set(channelId, {
             matchMode: storage.matchMode,
             stepStorage: storage.stepStorage,
+            restRoles: storage.restRoles,
             state: MatchState.pause,
             channel: guild.channels.cache.get(storage.channel) as any,
             teams: storage.teams.map((id: string) => guild.roles.cache.get(id)),

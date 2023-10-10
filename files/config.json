@@ -3,5 +3,6 @@
 	"LogChannel": "1072888724406415431",
 	"BPTimeLimit": 180,
 	"BPTimeAlert": 30,
-	"MatchFlow": "2"
+	"MatchFlow": "3",
+	"BPTimePrepare": 180
 }

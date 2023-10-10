@@ -7,6 +7,7 @@ export interface I_MatchStorage<S extends StepHeader = StepHeader> {
     readonly teams: [Role, Role];
     readonly matchMode: MatchMode;
     readonly stepStorage: S[];
+    readonly restRoles: Record<string, string[]>;
 }
 
 export interface I_MatchHandlers<S extends StepHeader<string> = StepHeader<string>> {
