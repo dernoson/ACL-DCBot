@@ -1,11 +1,11 @@
 import { GuildMember, roleMention } from 'discord.js';
-import { botEnv, getAdminMention } from '../BotEnv';
 import { createLogString } from '../utils';
-import { BPOption, BPStepSetting, BPStepStorage, isBPStepStorage, setBPSelect, setBPStart } from './bp';
-import { checkMatchComplete, removeStep } from './functions';
-import { clearMatchReg, getMatchCache, removeMatchTimeout, setMatchCache, setMatchTimeout } from './matchStorage';
+import { BPOption, BPStepSetting, BPStepStorage, isBPStepStorage, setBPRemove, setBPSelect, setBPStart } from './bp';
+import { checkMatchStepChange, removeStep } from './functions';
+import { getMatchCache, removeMatchTimeout, setMatchCache, setMatchTimeout } from './matchStorage';
 import { I_MatchHandlers, I_MatchStorage, MatchState, StepHeader } from './types';
-import { normalMentionOptions } from '../mentionOption';
+import { normalMentionOptions } from '../consts';
+import { getAdminMention, getConfigValue, log } from '../config';
 
 export const createExchangeHandler = (handlersDesc: string, flow: EXStepSetting[]): I_MatchHandlers<EXStepStorage> => {
     const [total] = getEXFlowTotal(flow);
@@ -14,22 +14,17 @@ export const createExchangeHandler = (handlersDesc: string, flow: EXStepSetting[
     return {
         desc,
         flow,
+        onStart: (storage) => onStart(flow, storage),
         onSelect(storage, operators, member) {
-            if (storage.state != MatchState.running) {
-                throw '當前頻道BP流程並非進行中';
-            }
-
-            const stepSetting = flow[storage.stepStorage.length];
+            const { stepStorage, channel, teams } = storage;
+            const stepSetting = flow[stepStorage.length];
 
             if (stepSetting.option != 'exchange') {
                 return createLogString(
-                    setBPSelect(stepSetting, storage, member, operators),
-                    logTotal(flow, storage) || undefined,
+                    setBPSelect(stepSetting, storage, member, operators), //
                     onStart(flow, storage) || undefined
                 );
-            }
-
-            if (!checkEXSelect(stepSetting, storage, member, operators)) {
+            } else if (!checkEXSelect(stepSetting, storage, member, operators)) {
                 return {
                     content: createLogString(
                         `你已選擇交換 \`${operators.join(' ')}\`，等待對方完成選擇。`, //
@@ -38,92 +33,41 @@ export const createExchangeHandler = (handlersDesc: string, flow: EXStepSetting[
                     ephemeral: true,
                 };
             } else {
+                const step: EXStepStorage & StepHeader<'exchange'> = {
+                    ...stepSetting,
+                    exOps: getMatchCache(channel, 'exchange', () => [[], []] as ExchangeCache),
+                };
+                stepStorage.push(step);
                 return createLogString(
-                    logTotal(flow, storage) || undefined, //
+                    `${teams[0].name} 的 \`${step.exOps[1].join(' ')}\` 與 ${teams[1].name} 的 \`${step.exOps[0].join(' ')}\` 交換`, //
                     onStart(flow, storage) || undefined
                 );
             }
         },
         onRemove(storage) {
-            const removedStage = removeStep(storage);
-            if (removedStage.option != 'exchange') {
-                const targetTeam = storage.teams[removedStage.teamIndex];
-                const content = `已移除 ${targetTeam.name} ${removedStage.option} 的 \`${removedStage.operators.join(' ')}\``;
-                return { content, log: content };
-            } else {
-                const content = createLogString(
-                    '已移除交換幹員：',
-                    `《${storage.teams[0].name}》${removedStage.exOps[1].join(' ')}`,
-                    '⇅',
-                    `《${storage.teams[1].name}》${removedStage.exOps[0].join(' ')}`
-                );
-                return { content, log: content };
-            }
+            const removedStep = removeStep(storage);
+            const content = removedStep.option != 'exchange' ? setBPRemove(removedStep, storage) : setEXRemove(removedStep, storage);
+            return { content, log: content };
         },
         logTotal: (storage) => logTotal(flow, storage),
-        onStart: (storage) => onStart(flow, storage),
     };
 };
 
-export const setEXStart = (stepSetting: EXStepSetting & StepHeader<'exchange'>, storage: I_MatchStorage) => {
-    const { channel, teams } = storage;
-    const BPTimeLimit = (botEnv.get('BPTimeLimit') as number) ?? 0;
-    const BPTimeAlert = (botEnv.get('BPTimeAlert') as number) ?? 0;
-
-    clearMatchReg(channel);
-
-    teams.forEach((team) => {
-        BPTimeLimit &&
-            setMatchTimeout(channel, `selectTimeout#${team.id}`, BPTimeLimit * 1000, () => {
-                storage.state = MatchState.pause;
-                channel.send({
-                    content: `${roleMention(team.id)} 選擇角色超時，流程暫停，請 ${getAdminMention()} 處理。`,
-                    allowedMentions: normalMentionOptions,
-                });
-                botEnv.log(`> ${team.name} 於 ${channel.name} 選擇角色超時。`);
-            });
-        BPTimeAlert &&
-            setMatchTimeout(channel, `selectAlert#${team.id}`, (BPTimeLimit - BPTimeAlert) * 1000, () => {
-                channel.send(`${roleMention(team.id)} 尚餘 ${BPTimeAlert} 秒`);
-            });
-    });
-
-    return `請雙方各自選擇要交換的 ${stepSetting.amount} 位幹員，該階段會在兩方都選擇完畢後，才會公布選擇內容。`;
-};
-
-export const checkEXSelect = (
-    stepSetting: EXStepSetting & StepHeader<'exchange'>,
-    storage: I_MatchStorage,
-    member: GuildMember,
-    operators: string[]
-) => {
-    const { channel, teams } = storage;
-    const cache = getMatchCache(channel, 'exchange', () => [[], []] as ExchangeCache);
-
-    const targetTeamIdx = teams.findIndex((team) => member.roles.cache.has(team.id)) as -1 | 0 | 1;
-    if (targetTeamIdx == -1) {
-        throw '當前頻道內你並無使用/select指令的權限';
+const onStart = (flow: EXStepSetting[], storage: I_MatchStorage) => {
+    if (checkMatchStepChange(flow, storage)) {
+        return createLogString(
+            logTotal(flow, storage) || undefined, //
+            `流程已結束，請 ${getAdminMention()} 進行最後確認。`
+        );
     }
-    if (cache[targetTeamIdx].length) {
-        throw '你已選擇過交換的幹員，請靜候對方的選取';
-    }
-    if (operators.length != stepSetting.amount) {
-        throw `選擇幹員數量應為 ${stepSetting.amount} 位，你選擇了 ${operators.length} 位，請重新選擇`;
-    }
+    const { stepStorage, teams } = storage;
+    const flowIndex = stepStorage.length;
+    const stepSetting = flow[flowIndex];
 
-    const EXList = getEXList(storage);
-    const opponentIndex = targetTeamIdx ? 0 : 1;
-    const opponentPick = EXList[opponentIndex].pick;
-    if (!operators.every((op) => opponentPick.includes(op))) {
-        throw '部分選擇的幹員沒有在對方的pick列表，請重新選擇';
-    }
-
-    cache[targetTeamIdx] = operators;
-    setMatchCache(channel, 'exchange', cache);
-    removeMatchTimeout(channel, `selectTimeout#${teams[targetTeamIdx].id}`);
-    removeMatchTimeout(channel, `selectAlert#${teams[targetTeamIdx].id}`);
-
-    return !!cache[0].length && !!cache[1].length;
+    return createLogString(
+        logTotal(flow, storage) || undefined, //
+        stepSetting.option != 'exchange' ? setBPStart(stepSetting, storage, teams[stepSetting.teamIndex]) : setEXStart(stepSetting, storage)
+    );
 };
 
 const logTotal = (flow: EXStepSetting[], storage: I_MatchStorage) => {
@@ -174,17 +118,77 @@ const logTotal = (flow: EXStepSetting[], storage: I_MatchStorage) => {
     );
 };
 
-const onStart = (flow: EXStepSetting[], storage: I_MatchStorage) => {
-    if (checkMatchComplete(flow, storage)) {
-        return `流程已結束，請 ${getAdminMention()} 進行最後確認。`;
+export const setEXStart = (stepSetting: EXStepSetting & StepHeader<'exchange'>, storage: I_MatchStorage) => {
+    const { channel, teams } = storage;
+    const BPTimeLimit = getConfigValue('BPTimeLimit') ?? 0;
+    const BPTimeAlert = getConfigValue('BPTimeAlert') ?? 0;
+
+    teams.forEach((team) => {
+        BPTimeLimit &&
+            setMatchTimeout(channel, `selectTimeout#${team.id}`, BPTimeLimit * 1000, () => {
+                storage.state = MatchState.pause;
+                channel.send({
+                    content: `${roleMention(team.id)} 選擇角色超時，流程暫停，請 ${getAdminMention()} 處理。`,
+                    allowedMentions: normalMentionOptions,
+                });
+                log(`> ${team.name} 於 ${channel.name} 選擇角色超時。`);
+            });
+        BPTimeAlert &&
+            setMatchTimeout(channel, `selectAlert#${team.id}`, (BPTimeLimit - BPTimeAlert) * 1000, () => {
+                channel.send(`${roleMention(team.id)} 尚餘 ${BPTimeAlert} 秒`);
+            });
+    });
+
+    return createLogString(
+        `請 ${roleMention(teams[0].id)} 、 ${roleMention(teams[1].id)} 各自選擇要交換的 ${stepSetting.amount} 位幹員`,
+        '該階段會在兩方都選擇完畢後，才會公布選擇內容。'
+    );
+};
+
+export const checkEXSelect = (
+    stepSetting: EXStepSetting & StepHeader<'exchange'>,
+    storage: I_MatchStorage,
+    member: GuildMember,
+    operators: string[]
+) => {
+    const { channel, teams } = storage;
+    const cache = getMatchCache(channel, 'exchange', () => [[], []] as ExchangeCache);
+
+    const targetTeamIdx = teams.findIndex((team) => member.roles.cache.has(team.id)) as -1 | 0 | 1;
+    if (targetTeamIdx == -1) {
+        throw '當前頻道內你並無使用/select指令的權限';
+    }
+    if (cache[targetTeamIdx].length) {
+        throw '你已選擇過交換的幹員，請靜候對方的選取';
+    }
+    if (operators.length != stepSetting.amount) {
+        throw `選擇幹員數量應為 ${stepSetting.amount} 位，你選擇了 ${operators.length} 位，請重新選擇`;
     }
 
-    const { stepStorage, teams } = storage;
-    const flowIndex = stepStorage.length;
-    const stepSetting = flow[flowIndex];
+    const EXList = getEXList(storage);
+    const opponentIndex = targetTeamIdx ? 0 : 1;
+    const opponentPick = EXList[opponentIndex].pick;
+    if (!operators.every((op) => opponentPick.includes(op))) {
+        throw '部分選擇的幹員沒有在對方的pick列表，請重新選擇';
+    }
 
-    if (stepSetting.option != 'exchange') return setBPStart(stepSetting, storage, teams[stepSetting.teamIndex]);
-    else return setEXStart(stepSetting, storage);
+    cache[targetTeamIdx] = operators;
+    setMatchCache(channel, 'exchange', cache);
+    removeMatchTimeout(channel, `selectTimeout#${teams[targetTeamIdx].id}`);
+    removeMatchTimeout(channel, `selectAlert#${teams[targetTeamIdx].id}`);
+
+    return !!cache[0].length && !!cache[1].length;
+};
+
+export const setEXRemove = (removedStep: EXStepStorage & StepHeader<'exchange'>, storage: I_MatchStorage) => {
+    const { exOps } = removedStep;
+    const { teams } = storage;
+    return createLogString(
+        '已移除交換幹員：', //
+        `《${teams[0].name}》${exOps[1].join(' ')}`,
+        '⇅',
+        `《${teams[1].name}》${exOps[0].join(' ')}`
+    );
 };
 
 const getEXFlowTotal = (flow: EXStepSetting[]) => {

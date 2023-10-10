@@ -1,31 +1,25 @@
-import { BaseGuildTextChannel, ChannelType } from 'discord.js';
-import { getMatchStorage, I_MatchHandlers, I_MatchStorage, matchModeMap, MatchState } from '../match';
+import { getAllMatchStorage, MatchState } from '../match';
 import { createCommand } from '../commandUtils';
-import { assertAdminPermission } from '../BotEnv';
 import { createLogString } from '../utils';
+import { assertAdminPermission } from '../config';
 
-export default createCommand('log_match', '[ 主辦方指令 ] 輸出BP流程情況')
-    .option_Channel('channel', '選擇要輸出的BP使用頻道，未填選時，視為選擇使用該指令的當前頻道', false, [ChannelType.GuildText])
-    .callback((ctx, { channel }) => {
+export default createCommand('log_match', '[ 主辦方指令 ] 輸出所有頻道的BP流程情況') //
+    .callback((ctx) => {
         assertAdminPermission(ctx);
-        const targetChannel = channel ?? ctx.channel;
-        if (!(targetChannel instanceof BaseGuildTextChannel)) throw '無法找到頻道';
 
-        const storage = getMatchStorage(targetChannel);
-        if (!storage) throw '頻道非BP使用頻道';
+        const storages = [...getAllMatchStorage()];
 
-        return { content: genMatchString(storage), ephemeral: true };
+        return {
+            content: !storages.length
+                ? '無任何已設定的BP流程'
+                : createLogString(
+                      ...storages.map(({ channel, teams, state }) => {
+                          return `**${channel.name}: ${teams[0].name} vs ${teams[1].name}** => ${matchStateWording[state]}`;
+                      })
+                  ),
+            ephemeral: true,
+        };
     });
-
-const genMatchString = (storage: I_MatchStorage) => {
-    const [teamA, teamB] = storage.teams;
-    const matchHandlers = matchModeMap[storage.matchMode] as I_MatchHandlers;
-    return createLogString(
-        `**${storage.channel.name}: ${teamA.name} vs ${teamB.name}**`, //
-        `狀態：${matchStateWording[storage.state]}`,
-        matchHandlers.logTotal(storage)
-    );
-};
 
 const matchStateWording: Record<MatchState, string> = {
     [MatchState.running]: '進行中',

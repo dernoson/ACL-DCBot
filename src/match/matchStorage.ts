@@ -1,17 +1,41 @@
-import { BaseGuildTextChannel, Client, Role } from 'discord.js';
-import { I_MatchStorage, MatchState } from './types';
+import { BaseGuildTextChannel, Role } from 'discord.js';
+import { I_MatchStorage, MatchMode, MatchState } from './types';
 import { TimeoutHandler, createTimeoutHandler, getMapValue, getObjectEntries } from '../utils';
 import { readJson, writeJson } from '../fileHandlers';
+import { channelPermission } from '../consts';
+import { getEnv } from '../config';
 
-export const createMatchStorage = (channel: BaseGuildTextChannel, teams: [Role, Role], matchMode: string) => {
+export const createMatchStorage = (channel: BaseGuildTextChannel, teams: [Role, Role], matchMode: MatchMode) => {
     const storage: I_MatchStorage = {
         channel,
         teams,
         matchMode,
         state: MatchState.pause,
         stepStorage: [],
+        restRoles: {},
     };
+
+    channel.guild.members.fetch().then((members) => {
+        members.forEach((member) => {
+            teams.forEach((team) => {
+                const memberRoles = member.roles.cache;
+                if (!memberRoles.has(team.id)) return;
+
+                storage.restRoles[member.id] = [...memberRoles.keys()].filter((id) => id != team.id);
+
+                member.roles.set([team]).catch((error) => console.log(error));
+            });
+        });
+
+        dumpMatchStorage();
+    });
+
+    teams.forEach((team) => {
+        channel.permissionOverwrites.create(team, channelPermission).catch((error) => console.log(error));
+    });
+
     matchStorageTable.set(channel.id, storage);
+    dumpMatchStorage();
     return storage;
 };
 
@@ -24,21 +48,26 @@ export const getAllMatchStorage = () => {
 };
 
 export const removeMatchStorage = (channel: BaseGuildTextChannel) => {
-    clearMatchReg(channel);
-    matchStorageTable.delete(channel.id);
-};
+    const storage = getMatchStorage(channel);
+    if (!storage) return;
+    const { teams, restRoles } = storage;
 
-export const clearMatchStorage = (): BaseGuildTextChannel[] => {
-    const removedChannels: BaseGuildTextChannel[] = [];
+    channel.guild.members.fetch().then((members) => {
+        members.forEach((member) => {
+            const restRole = restRoles[member.id];
+            if (!restRole) return;
 
-    matchStorageTable.forEach(({ channel }) => {
-        removedChannels.push(channel);
-        clearMatchReg(channel);
+            member.roles.add(restRole).catch((error) => console.log(error));
+        });
     });
 
-    matchStorageTable.clear();
+    teams.forEach((team) => {
+        channel.permissionOverwrites.delete(team).catch((error) => console.log(error));
+    });
 
-    return removedChannels;
+    clearMatchReg(channel);
+    matchStorageTable.delete(channel.id);
+    dumpMatchStorage();
 };
 
 export const dumpMatchStorage = async () => {
@@ -48,6 +77,7 @@ export const dumpMatchStorage = async () => {
             [storage.channel.id]: {
                 matchMode: storage.matchMode,
                 stepStorage: storage.stepStorage,
+                restRoles: storage.restRoles,
                 channel: storage.channel.id,
                 teams: storage.teams.map((role) => role.id),
             },
@@ -57,8 +87,8 @@ export const dumpMatchStorage = async () => {
     await writeJson(file, 'match.json');
 };
 
-export const recoverMatchStorage = async (client: Client<true>) => {
-    const guild = client.guilds.cache.first();
+export const recoverMatchStorage = async () => {
+    const { guild } = getEnv();
     if (!guild) return;
     const file = await readJson<Record<string, any>>('match.json', () => ({}));
     matchStorageTable.clear();
@@ -66,6 +96,7 @@ export const recoverMatchStorage = async (client: Client<true>) => {
         matchStorageTable.set(channelId, {
             matchMode: storage.matchMode,
             stepStorage: storage.stepStorage,
+            restRoles: storage.restRoles,
             state: MatchState.pause,
             channel: guild.channels.cache.get(storage.channel) as any,
             teams: storage.teams.map((id: string) => guild.roles.cache.get(id)),
@@ -110,6 +141,6 @@ export const clearMatchReg = (channel: BaseGuildTextChannel) => {
 
 const timeoutHandlerTable = new Map<string, Map<string, TimeoutHandler>>();
 
-const matchStorageTable = new Map<string, I_MatchStorage>();
+const matchStorageTable = new Map<string, I_MatchStorage<any>>();
 
 const cacheTable = new Map<string, Map<string, unknown>>();

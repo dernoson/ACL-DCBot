@@ -1,10 +1,11 @@
-import { BaseGuildTextChannel, Client, GatewayIntentBits, PermissionFlagsBits, REST, Routes } from 'discord.js';
+import { BaseGuildTextChannel, Client, REST, Routes } from 'discord.js';
 import { BotToken, BotClientID } from './secret/tokens';
-import { botEnv } from './BotEnv';
 import { getMatchStorage, recoverMatchStorage } from './match';
 import { extraResponse } from './responses';
 import { Help, commandDefs, commandFunctions } from './commands';
-import { writeError } from './fileHandlers';
+import { clientOptions } from './consts';
+import { hasSendMessagePermission } from './functions';
+import { getEnv, initEnv, readConfig } from './config';
 
 const helpCommandBuilder = Help.getBuilder();
 const requestDataBody = commandDefs.concat(helpCommandBuilder);
@@ -16,44 +17,46 @@ new REST()
     .then(() => console.log('Successfully reloaded application (/) commands.'))
     .catch((error) => console.error(error));
 
-const client = new Client({
-    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
-});
+const client = new Client(clientOptions);
 
 client.on('ready', async (client) => {
-    await botEnv.onBotReady(client);
-    await recoverMatchStorage(client);
+    await readConfig();
+    initEnv(client);
+    await recoverMatchStorage();
+
+    isBotReady = true;
     console.log(`Logged in as ${client.user.tag}!`);
-    envIsReady = true;
 });
 
 client.on('messageCreate', async (message) => {
     try {
-        if (!envIsReady) return;
+        if (!isBotReady) return;
         if (!message.inGuild() || message.author.bot) return;
-        if (message.channelId == botEnv.logChannel?.id) return;
+        if (!hasSendMessagePermission(message.guild, message.channel)) return;
+
+        if (message.channelId == getEnv().logChannel?.id) return;
         if (message.channel instanceof BaseGuildTextChannel && getMatchStorage(message.channel)) return;
-        const selfMember = message.guild.members.me;
-        if (!selfMember?.permissions.has(PermissionFlagsBits.SendMessages)) return;
-        if (!selfMember?.permissionsIn(message.channel).has(PermissionFlagsBits.SendMessages)) return;
 
         const resp = extraResponse(message);
         if (resp) await message.reply(resp);
     } catch (error) {
-        writeError(error);
+        console.log(error);
     }
 });
 
 client.on('interactionCreate', async (interaction) => {
     try {
-        if (!interaction.inGuild() || !interaction.isChatInputCommand()) return;
-        if (!envIsReady) await interaction.reply('機器人尚未就緒');
+        if (!interaction.isChatInputCommand()) return;
+        if (!interaction.inGuild() || !interaction.guild || !interaction.channel) return;
+        if (!hasSendMessagePermission(interaction.guild, interaction.channel)) return;
+        if (!isBotReady) await interaction.reply('機器人尚未就緒');
+
         await interactionExecutes[interaction.commandName]?.(interaction);
     } catch (error) {
-        writeError(error);
+        console.log(error);
     }
 });
 
 client.login(BotToken);
 
-let envIsReady = false;
+let isBotReady = false;

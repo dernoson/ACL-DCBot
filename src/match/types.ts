@@ -5,8 +5,9 @@ export interface I_MatchStorage<S extends StepHeader = StepHeader> {
     state: MatchState;
     readonly channel: BaseGuildTextChannel;
     readonly teams: [Role, Role];
-    readonly matchMode: string;
+    readonly matchMode: MatchMode;
     readonly stepStorage: S[];
+    readonly restRoles: Record<string, string[]>;
 }
 
 export interface I_MatchHandlers<S extends StepHeader<string> = StepHeader<string>> {
@@ -16,6 +17,13 @@ export interface I_MatchHandlers<S extends StepHeader<string> = StepHeader<strin
     onStart: (storage: I_MatchStorage<S>) => CommandResult;
     onRemove: (storage: I_MatchStorage<S>) => CommandResult;
     onSelect: (storage: I_MatchStorage<S>, operators: string[], member: GuildMember) => CommandResult;
+}
+
+export const enum MatchMode {
+    normal,
+    test,
+    exchange,
+    testExchange,
 }
 
 export const enum MatchState {
