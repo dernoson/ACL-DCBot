@@ -1,12 +1,5 @@
-import dayjs from 'dayjs';
 import fs from 'fs/promises';
 import { MutualLock, createMutualLock } from './utils';
-
-export const writeError = (error: any) => {
-    const filename = 'errorLog-' + dayjs().format('YYYY-MM-DD_HH-mm-ss') + '.json';
-    console.log(error);
-    writeJson(error, filename);
-};
 
 export const readJson = async <D extends Record<string, any>>(fileName: string, init: () => D): Promise<D> => {
     if (!(fileName in lockMap)) lockMap[fileName] = createMutualLock();

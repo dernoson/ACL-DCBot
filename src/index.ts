@@ -3,7 +3,6 @@ import { BotToken, BotClientID } from './secret/tokens';
 import { getMatchStorage, recoverMatchStorage } from './match';
 import { extraResponse } from './responses';
 import { Help, commandDefs, commandFunctions } from './commands';
-import { writeError } from './fileHandlers';
 import { clientOptions } from './consts';
 import { hasSendMessagePermission } from './functions';
 import { getEnv, initEnv, readConfig } from './config';
@@ -41,7 +40,7 @@ client.on('messageCreate', async (message) => {
         const resp = extraResponse(message);
         if (resp) await message.reply(resp);
     } catch (error) {
-        writeError(error);
+        console.log(error);
     }
 });
 
@@ -54,7 +53,7 @@ client.on('interactionCreate', async (interaction) => {
 
         await interactionExecutes[interaction.commandName]?.(interaction);
     } catch (error) {
-        writeError(error);
+        console.log(error);
     }
 });
 
