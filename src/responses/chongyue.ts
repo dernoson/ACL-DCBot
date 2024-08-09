@@ -10,7 +10,7 @@ export const chongyue: MessageResponser = {
     },
 };
 
-const randStr = (idx = 0) => {
+const randStr = (idx = 0): string => {
     if (idx > 4) return '';
     const randNum = idx ? getRandomInt(responseStr.length * 1.5) : getRandomInt(responseStr.length);
     const res = responseStr[randNum];

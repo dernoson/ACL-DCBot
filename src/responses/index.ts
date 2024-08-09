@@ -7,6 +7,7 @@ import { saileach } from './saileach';
 import { shadow } from './shadow';
 import { TimeoutHandler, createRestrictObj, createTimeoutHandler, getObjectEntries } from '../utils';
 import { getConfigValue } from '../config';
+import { winsok } from './winsok';
 
 export const extraResponse = (message: Message<true>) => {
     const pluginKey = getConfigValue('ResponsePlugin');
@@ -36,6 +37,7 @@ const responsePlugins = createRestrictObj<Record<string, MessageResponser>>()({
     chongyue,
     saileach,
     shadow,
+    winsok
 });
 
 export const responsePluginDesc = getObjectEntries(responsePlugins).reduce<Record<ResponsePluginKey, string>>(
