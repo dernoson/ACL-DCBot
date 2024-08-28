@@ -1,7 +1,6 @@
 import { BaseGuildTextChannel, Role } from 'discord.js';
 import { I_MatchStorage, MatchMode, MatchState } from './types';
-import { TimeoutHandler, createTimeoutHandler, getMapValue, getObjectEntries } from '../utils';
-import { readJson, writeJson } from '../fileHandlers';
+import { getMapValue, readJson, writeJson } from '../utils';
 import { channelPermission } from '../consts';
 import { getEnv } from '../config';
 
@@ -90,34 +89,42 @@ export const dumpMatchStorage = async () => {
 export const recoverMatchStorage = async () => {
     const { guild } = getEnv();
     if (!guild) return;
-    const file = await readJson<Record<string, any>>('match.json', () => ({}));
-    matchStorageTable.clear();
-    getObjectEntries(file).forEach(([channelId, storage]) => {
-        matchStorageTable.set(channelId, {
-            matchMode: storage.matchMode,
-            stepStorage: storage.stepStorage,
-            restRoles: storage.restRoles,
-            state: MatchState.pause,
-            channel: guild.channels.cache.get(storage.channel) as any,
-            teams: storage.teams.map((id: string) => guild.roles.cache.get(id)),
+    try {
+        const file = await readJson<Record<string, any>>('match.json');
+
+        console.log('已找到 files/match.json，嘗試恢復紀錄');
+
+        matchStorageTable.clear();
+        Object.entries(file).forEach(([channelId, storage]) => {
+            matchStorageTable.set(channelId, {
+                matchMode: storage.matchMode,
+                stepStorage: storage.stepStorage,
+                restRoles: storage.restRoles,
+                state: MatchState.pause,
+                channel: guild.channels.cache.get(storage.channel) as any,
+                teams: storage.teams.map((id: string) => guild.roles.cache.get(id)),
+            });
         });
-    });
+    } catch {}
 };
 
 export const setMatchTimeout = (channel: BaseGuildTextChannel, key: string, timeLimitMs: number, fn: () => any) => {
-    const matchTimeoutMap = getMapValue(timeoutHandlerTable, channel.id, () => new Map<string, TimeoutHandler>());
-    matchTimeoutMap.get(key)?.cancel();
-    matchTimeoutMap.set(key, createTimeoutHandler(timeLimitMs, fn));
+    const matchTimeoutMap = getMapValue(timeoutHandlerTable, channel.id, () => new Map<string, NodeJS.Timeout>());
+    const prevTimer = matchTimeoutMap.get(key);
+    prevTimer && clearTimeout(prevTimer);
+    matchTimeoutMap.set(key, setTimeout(fn, timeLimitMs));
 };
 
 export const removeMatchTimeout = (channel: BaseGuildTextChannel, key?: string) => {
     const timeoutHandlers = timeoutHandlerTable.get(channel.id);
     if (!timeoutHandlers) return;
     if (!key) {
-        timeoutHandlers.forEach((handler) => handler.cancel());
+        timeoutHandlers.forEach((handler) => clearTimeout(handler));
         timeoutHandlers.clear();
     } else {
-        timeoutHandlers.get(key)?.cancel();
+        const targetTimer = timeoutHandlers.get(key);
+        if (!targetTimer) return;
+        clearTimeout(targetTimer);
         timeoutHandlers.delete(key);
     }
 };
@@ -134,12 +141,12 @@ export const getMatchCache = <V>(channel: BaseGuildTextChannel, key: string, ini
 
 export const clearMatchReg = (channel: BaseGuildTextChannel) => {
     const channelId = channel.id;
-    timeoutHandlerTable.get(channelId)?.forEach((handler) => handler.cancel());
+    timeoutHandlerTable.get(channelId)?.forEach((handler) => clearTimeout(handler));
     timeoutHandlerTable.delete(channelId);
     cacheTable.delete(channelId);
 };
 
-const timeoutHandlerTable = new Map<string, Map<string, TimeoutHandler>>();
+const timeoutHandlerTable = new Map<string, Map<string, NodeJS.Timeout>>();
 
 const matchStorageTable = new Map<string, I_MatchStorage<any>>();
 

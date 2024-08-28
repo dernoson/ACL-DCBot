@@ -1,6 +1,6 @@
-import { commandSuccessResp } from '../functions';
-import { isResponsePluginKey, responsePluginDesc } from '../responses';
-import { createLogString, getObjectEntries } from '../utils';
+import { commandSuccessResp } from '../commandUtils';
+import { isResponsePluginKey, responsePlugins } from '../responses';
+import { createLogString } from '../utils';
 import { setConfigValue } from './functions';
 import { ConfigOption } from './types';
 
@@ -16,8 +16,13 @@ export const ResponsePlugin: ConfigOption = {
         } else {
             throw createLogString(
                 '僅可接受以下字串值：', //
-                ...getObjectEntries(responsePluginDesc).map(([key, desc]) => `\`${key}\` : ${desc}`)
+                ...Object.entries(responsePluginDesc).map(([key, desc]) => `\`${key}\` : ${desc}`)
             );
         }
     },
 };
+
+export const responsePluginDesc = Object.entries(responsePlugins).reduce(
+    (prev, [key, plugin]) => ({ ...prev, [key]: plugin.desc }),
+    {} as Record<string, string>
+);

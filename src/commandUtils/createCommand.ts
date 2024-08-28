@@ -1,6 +1,5 @@
 import { ApplicationCommandOptionAllowedChannelTypes, SlashCommandBuilder } from 'discord.js';
-import { CommandBuilder, CommandExecute, I_Command, I_FixedCommand } from './types';
-import { getObjectEntries } from '../utils';
+import { CommandBuilder, CommandExecute, CommandResult, I_Command, I_FixedCommand } from './types';
 import { createCommandExecute } from './createCommandExecute';
 
 export const createCommand = (name: string, description: string): I_Command => {
@@ -115,3 +114,11 @@ export const createCommand = (name: string, description: string): I_Command => {
 
     return command;
 };
+
+export const commandSuccessResp = (content: string): CommandResult => ({
+    content,
+    log: content,
+    ephemeral: true,
+});
+
+export const getObjectEntries = <O extends {}>(obj: O) => Object.entries(obj) as [keyof O, O[keyof O]][];

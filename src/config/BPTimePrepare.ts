@@ -1,4 +1,4 @@
-import { commandSuccessResp } from '../functions';
+import { commandSuccessResp } from '../commandUtils';
 import { setConfigValue } from './functions';
 import { ConfigOption } from './types';
 

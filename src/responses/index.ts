@@ -1,12 +1,11 @@
 import { Message } from 'discord.js';
 import { MessageResponser } from './types';
+import { getConfigValue } from '../config';
 import { sellVegetable } from './sellVegetable';
 import { grapeFruitify } from './grapeFruitify';
 import { chongyue } from './chongyue';
 import { saileach } from './saileach';
 import { shadow } from './shadow';
-import { TimeoutHandler, createRestrictObj, createTimeoutHandler, getObjectEntries } from '../utils';
-import { getConfigValue } from '../config';
 import { winsok } from './winsok';
 
 export const extraResponse = (message: Message<true>) => {
@@ -20,30 +19,25 @@ export const extraResponse = (message: Message<true>) => {
 };
 
 const forceSilence = () => {
-    timer?.cancel();
-    timer = createTimeoutHandler(180 * 1000, () => (isSilence = false));
+    silenceTimer && clearTimeout(silenceTimer);
+    silenceTimer = setTimeout(() => (isSilence = false), 180 * 1000);
     if (isSilence) return '阿是要我閉嘴幾次？';
     isSilence = true;
     return Math.random() > 0.5 ? '兇屁阿，好啦我暫時閉嘴行吧' : '好，我閉嘴，我看你BP時怎麼選角';
 };
 
-let timer: TimeoutHandler | undefined;
+let silenceTimer: NodeJS.Timeout | undefined;
 
 let isSilence = false;
 
-const responsePlugins = createRestrictObj<Record<string, MessageResponser>>()({
+export const responsePlugins: Record<string, MessageResponser> = {
     sellVegetable,
     grapeFruitify,
     chongyue,
     saileach,
     shadow,
-    winsok
-});
-
-export const responsePluginDesc = getObjectEntries(responsePlugins).reduce<Record<ResponsePluginKey, string>>(
-    (prev, [key, plugin]) => ({ ...prev, [key]: plugin.desc }),
-    {} as Record<ResponsePluginKey, string>
-);
+    winsok,
+};
 
 export const isResponsePluginKey = (value: any): value is ResponsePluginKey => {
     return value in responsePlugins;

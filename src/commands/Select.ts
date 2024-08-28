@@ -1,6 +1,5 @@
 import { BaseGuildTextChannel, GuildMember } from 'discord.js';
 import { getMatchStorage, getMatchHandlers, MatchState } from '../match';
-import { createNoRepeatArr } from '../utils';
 import { createCommand } from '../commandUtils';
 
 export default createCommand('select', '[ 參賽者指令 ] 輸入我方所要選擇的幹員')
@@ -18,5 +17,5 @@ export default createCommand('select', '[ 參賽者指令 ] 輸入我方所要�
 
         const modeSetting = getMatchHandlers(storage.matchMode);
 
-        return modeSetting.onSelect(storage, createNoRepeatArr(operators.trim().split(/\s+/)), member);
+        return modeSetting.onSelect(storage, [...new Set(operators.trim().split(/\s+/))], member);
     });

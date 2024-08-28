@@ -1,7 +1,6 @@
 import { TextChannel } from 'discord.js';
 import { getMatchStorage, removeMatchStorage } from '../match';
-import { createCommand } from '../commandUtils';
-import { commandSuccessResp } from '../functions';
+import { createCommand, commandSuccessResp } from '../commandUtils';
 import { assertAdminPermission } from '../config';
 
 export default createCommand('match_clear', '[ 主辦方指令 ] 清除該頻道的BP流程') //

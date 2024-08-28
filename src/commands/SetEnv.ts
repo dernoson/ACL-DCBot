@@ -1,7 +1,6 @@
 import { BaseGuildTextChannel, channelMention, ChannelType, GuildMember, PermissionFlagsBits, Role } from 'discord.js';
 import { createCommand } from '../commandUtils';
-import { hasSendMessagePermission } from '../functions';
-import { createLogString } from '../utils';
+import { createLogString, hasSendMessagePermission } from '../utils';
 import { getAdminMention, setConfigValue } from '../config';
 
 export default createCommand('set_env', '[ 管理員指令 ] 設定主辦權限身分組，以及設定機器人log頻道')

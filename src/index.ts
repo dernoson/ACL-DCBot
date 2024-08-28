@@ -3,9 +3,8 @@ import { getMatchStorage, recoverMatchStorage } from './match';
 import { extraResponse } from './responses';
 import { Help, commandDefs, commandFunctions } from './commands';
 import { clientOptions } from './consts';
-import { hasSendMessagePermission } from './functions';
 import { getEnv, initEnv, readConfig } from './config';
-import { readJson } from './fileHandlers';
+import { readJson, hasSendMessagePermission } from './utils';
 
 const main = async () => {
     const helpCommandBuilder = Help.getBuilder();
@@ -15,7 +14,7 @@ const main = async () => {
         [helpCommandBuilder.name]: Help.getExecute(),
     };
 
-    const { BotToken, BotClientID } = await readJson('secret.json', () => initBotInfo);
+    const { BotToken, BotClientID } = await readJson('secret.json');
 
     new REST()
         .setToken(BotToken)
@@ -69,8 +68,3 @@ const main = async () => {
 };
 
 main();
-
-const initBotInfo = {
-    BotToken: '',
-    BotClientID: '',
-};

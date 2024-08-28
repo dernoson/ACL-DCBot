@@ -1,6 +1,6 @@
-import { commandSuccessResp } from '../functions';
+import { commandSuccessResp } from '../commandUtils';
 import { defaultMatchMode, isMatchMode, matchModeDesc } from '../match';
-import { createLogString, getObjectEntries } from '../utils';
+import { createLogString } from '../utils';
 import { setConfigValue } from './functions';
 import { ConfigOption } from './types';
 
@@ -17,7 +17,7 @@ export const MatchFlow: ConfigOption = {
         } else {
             throw createLogString(
                 '僅可接受以下字串值：', //
-                ...getObjectEntries(matchModeDesc).map(([key, desc]) => `\`${key}\` : ${desc}`)
+                ...Object.entries(matchModeDesc).map(([key, desc]) => `\`${key}\` : ${desc}`)
             );
         }
     },

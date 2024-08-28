@@ -1,4 +1,3 @@
-import { getObjectEntries } from '../utils';
 import { createBPHandlers } from './bp';
 import { createExchangeHandler } from './exchange';
 import { I_MatchHandlers, MatchMode } from './types';
@@ -79,7 +78,7 @@ const matchModeMap: Record<MatchMode, I_MatchHandlers<any>> = {
 
 export const getMatchHandlers = (key: MatchMode) => matchModeMap[key];
 
-export const matchModeDesc = getObjectEntries(matchModeMap).reduce<Record<MatchMode, string>>(
+export const matchModeDesc = Object.entries(matchModeMap).reduce(
     (prev, [key, handlers]) => ({ ...prev, [key]: handlers.desc }),
     {} as Record<MatchMode, string>
 );
