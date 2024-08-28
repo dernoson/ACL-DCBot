@@ -24,6 +24,11 @@ export const initEnv = (client: Client<true>) => {
 
 export const getEnv = () => Object.freeze(env);
 
+export const setEnv = (admin: Role | undefined, logChannel: BaseGuildTextChannel | undefined) => {
+    env.admin = admin;
+    env.logChannel = logChannel;
+};
+
 export const getConfigRole = <K extends keyof Config>(key: K): Config[K] extends string ? Role | undefined : undefined => {
     const value = getConfigValue(key);
     if (typeof value != 'string') return;

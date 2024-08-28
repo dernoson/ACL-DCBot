@@ -1,7 +1,7 @@
 import { BaseGuildTextChannel, channelMention, ChannelType, GuildMember, PermissionFlagsBits, Role } from 'discord.js';
 import { createCommand } from '../commandUtils';
 import { createLogString, hasSendMessagePermission } from '../utils';
-import { getAdminMention, setConfigValue } from '../config';
+import { getAdminMention, setConfigValue, setEnv } from '../config';
 
 export default createCommand('set_env', '[ 管理員指令 ] 設定主辦權限身分組，以及設定機器人log頻道')
     .option_Role('admin_role', '設定主辦權限身分組，當未設定時，主辦權限設為管理員權限')
@@ -23,6 +23,7 @@ export default createCommand('set_env', '[ 管理員指令 ] 設定主辦權限�
 
         setConfigValue('Admin', admin?.id);
         setConfigValue('LogChannel', logChannel?.id);
+        setEnv(admin, logChannel);
 
         console.log(`[SetEnv by ${user.username}] admin: ${admin?.name ?? '伺服器管理員'}, logChannel: ${logChannel?.name ?? '無'}`);
         return {
