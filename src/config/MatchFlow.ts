@@ -1,4 +1,4 @@
-import { commandSuccessResp } from '../commandUtils';
+import { commandSuccessResp } from '../utils';
 import { defaultMatchMode, isMatchMode, matchModeDesc } from '../match';
 import { createLogString } from '../utils';
 import { setConfigValue } from './functions';

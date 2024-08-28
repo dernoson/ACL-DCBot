@@ -1,11 +1,10 @@
 import { TextChannel, EmbedBuilder, roleMention } from 'discord.js';
 import { getMatchStorage, getMatchHandlers, MatchState, removeMatchStorage } from '../match';
-import { createCommand } from '../commandUtils';
-import { createLogString } from '../utils';
+import { BotCommand, createLogString } from '../utils';
 import dayjs from 'dayjs';
 import { assertAdminPermission, getConfig, getEnv } from '../config';
 
-export default createCommand('match_confirm', '[ 主辦方指令 ] 確認該頻道的BP流程') //
+export default new BotCommand('match_confirm', '[ 主辦方指令 ] 確認該頻道的BP流程') //
     .callback((ctx) => {
         assertAdminPermission(ctx);
 

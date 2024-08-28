@@ -1,8 +1,7 @@
-import { createCommand } from '../commandUtils';
+import { BotCommand, createLogString } from '../utils';
 import { assertAdminPermission, configOptionDescs, getConfig } from '../config';
-import { createLogString } from '../utils';
 
-export default createCommand('log_config', '[ 主辦方指令 ] 輸出機器人設定值') //
+export default new BotCommand('log_config', '[ 主辦方指令 ] 輸出機器人設定值') //
     .callback((ctx) => {
         assertAdminPermission(ctx);
 

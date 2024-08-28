@@ -1,8 +1,8 @@
 import { BaseGuildTextChannel, GuildMember } from 'discord.js';
 import { getMatchStorage, getMatchHandlers, MatchState } from '../match';
-import { createCommand } from '../commandUtils';
+import { BotCommand } from '../utils';
 
-export default createCommand('select', '[ 參賽者指令 ] 輸入我方所要選擇的幹員')
+export default new BotCommand('select', '[ 參賽者指令 ] 輸入我方所要選擇的幹員')
     .option_String('operators', '幹員全名，當多於一個幹員時，使用空白分隔', true)
     .callback((ctx, { operators }) => {
         const { channel, member } = ctx;

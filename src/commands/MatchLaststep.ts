@@ -1,9 +1,9 @@
 import { TextChannel } from 'discord.js';
 import { getMatchStorage, getMatchHandlers } from '../match';
-import { createCommand } from '../commandUtils';
 import { assertAdminPermission } from '../config';
+import { BotCommand } from '../utils';
 
-export default createCommand('match_laststep', '[ 主辦方指令 ] 恢復該頻道的BP流程至上一個步驟') //
+export default new BotCommand('match_laststep', '[ 主辦方指令 ] 恢復該頻道的BP流程至上一個步驟') //
     .callback((ctx) => {
         assertAdminPermission(ctx);
 

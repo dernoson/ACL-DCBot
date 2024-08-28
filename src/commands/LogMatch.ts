@@ -1,10 +1,9 @@
 import { getMatchStorage, matchModeDesc, MatchState, matchFlowMap } from '../match';
-import { createCommand } from '../commandUtils';
-import { createLogString } from '../utils';
+import { BotCommand, createLogString } from '../utils';
 import { assertAdminPermission } from '../config';
 import { roleMention, TextChannel } from 'discord.js';
 
-export default createCommand('log_match', '[ 主辦方指令 ] 輸出該頻道的BP流程情況') //
+export default new BotCommand('log_match', '[ 主辦方指令 ] 輸出該頻道的BP流程情況') //
     .callback((ctx) => {
         assertAdminPermission(ctx);
 

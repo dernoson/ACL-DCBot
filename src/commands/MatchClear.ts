@@ -1,9 +1,9 @@
 import { TextChannel } from 'discord.js';
 import { getMatchStorage, removeMatchStorage } from '../match';
-import { createCommand, commandSuccessResp } from '../commandUtils';
+import { BotCommand, commandSuccessResp } from '../utils';
 import { assertAdminPermission } from '../config';
 
-export default createCommand('match_clear', '[ 主辦方指令 ] 清除該頻道的BP流程') //
+export default new BotCommand('match_clear', '[ 主辦方指令 ] 清除該頻道的BP流程') //
     .callback((ctx) => {
         assertAdminPermission(ctx);
 

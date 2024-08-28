@@ -1,5 +1,5 @@
 import { BaseGuildTextChannel, GuildMember, Role } from 'discord.js';
-import { CommandResult } from '../commandUtils';
+import { CommandResult } from '../utils';
 
 export interface I_MatchStorage<S extends StepHeader = StepHeader> {
     state: MatchState;

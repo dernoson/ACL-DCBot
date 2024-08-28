@@ -1,4 +1,4 @@
-import { commandSuccessResp } from '../commandUtils';
+import { commandSuccessResp } from '../utils';
 import { isResponsePluginKey, responsePlugins } from '../responses';
 import { createLogString } from '../utils';
 import { setConfigValue } from './functions';

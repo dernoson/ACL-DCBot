@@ -1,5 +1,5 @@
 import { EmbedBuilder } from 'discord.js';
-import { createCommand, CommandExecute } from '../commandUtils';
+import { BotCommand, CommandExecute } from '../utils';
 import SetEnv from './SetEnv';
 import MatchSet from './MatchSet';
 import MatchStart from './MatchStart';
@@ -31,7 +31,7 @@ export const commandFunctions: Record<string, CommandExecute> = commands.reduce(
     return { ...prev, [name]: command.getExecute() };
 }, {});
 
-export const Help = createCommand('help', '機器人講解') //
+export const Help = new BotCommand('help', '機器人講解') //
     .callback(() => {
         const embed = new EmbedBuilder()
             .setTitle('Arknights ACL Bot')

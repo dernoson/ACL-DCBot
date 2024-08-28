@@ -1,5 +1,5 @@
 import type { BaseGuildTextChannel, ChatInputCommandInteraction, Guild, Role } from 'discord.js';
-import type { CommandResult } from '../commandUtils';
+import type { CommandResult } from '../utils';
 import type { MatchMode } from '../match';
 import type { ResponsePluginKey } from '../responses';
 

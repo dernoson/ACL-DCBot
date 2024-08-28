@@ -1,12 +1,11 @@
 import { BaseGuildTextChannel, Role } from 'discord.js';
 import { defaultMatchMode, getMatchStorage, createMatchStorage, matchModeDesc, setMatchTimeout, getMatchHandlers } from '../match';
-import { createCommand } from '../commandUtils';
 import { assertAdminPermission, getConfigValue } from '../config';
 import { roleMention } from 'discord.js';
-import { createLogString } from '../utils';
+import { BotCommand, createLogString } from '../utils';
 import { normalMentionOptions } from '../consts';
 
-export default createCommand('match_set', '[ 主辦方指令 ] 創建並啟動該頻道的BP流程')
+export default new BotCommand('match_set', '[ 主辦方指令 ] 創建並啟動該頻道的BP流程')
     .option_Role('team1', '先手隊伍身分組', true)
     .option_Role('team2', '後手隊伍身分組', true)
     .callback((ctx, { team1, team2 }) => {

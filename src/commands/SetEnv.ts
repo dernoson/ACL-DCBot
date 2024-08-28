@@ -1,9 +1,8 @@
 import { BaseGuildTextChannel, channelMention, ChannelType, GuildMember, PermissionFlagsBits, Role } from 'discord.js';
-import { createCommand } from '../commandUtils';
-import { createLogString, hasSendMessagePermission } from '../utils';
+import { BotCommand, createLogString, hasSendMessagePermission } from '../utils';
 import { getAdminMention, setConfigValue, setEnv } from '../config';
 
-export default createCommand('set_env', '[ 管理員指令 ] 設定主辦權限身分組，以及設定機器人log頻道')
+export default new BotCommand('set_env', '[ 管理員指令 ] 設定主辦權限身分組，以及設定機器人log頻道')
     .option_Role('admin_role', '設定主辦權限身分組，當未設定時，主辦權限設為管理員權限')
     .option_Channel('log_channel', '設定機器人log頻道，當未設定時，僅將log導向server console log', false, [ChannelType.GuildText])
     .permission(PermissionFlagsBits.Administrator)
