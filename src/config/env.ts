@@ -22,7 +22,7 @@ export const initEnv = (client: Client<true>) => {
     console.log('機器人log頻道指定:', env.logChannel?.name ?? '無');
 };
 
-export const getEnv = () => Object.freeze(env);
+export const getEnv = () => Object.freeze({ ...env });
 
 export const setEnv = (admin: Role | undefined, logChannel: BaseGuildTextChannel | undefined) => {
     env.admin = admin;
