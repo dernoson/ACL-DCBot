@@ -34,10 +34,11 @@ export default createCommand('match_set', '[ 主辦方指令 ] 創建並啟動�
             return typeof content == 'string' ? content : content.content ?? '';
         };
 
-        BPTimePrepare &&
+        if (BPTimePrepare) {
             setMatchTimeout(channel, 'prepare', BPTimePrepare * 1000, () => {
                 channel.send({ content: startMatch(), allowedMentions: normalMentionOptions });
             });
+        }
 
         return {
             content: createLogString(
