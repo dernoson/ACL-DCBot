@@ -1,9 +1,9 @@
 import { TextChannel, EmbedBuilder, roleMention } from 'discord.js';
-import { dumpMatchStorage, getMatchStorage, getMatchHandlers, MatchState, removeMatchStorage } from '../match';
+import { getMatchStorage, getMatchHandlers, MatchState, removeMatchStorage } from '../match';
 import { createCommand } from '../commandUtils';
 import { createLogString } from '../utils';
 import dayjs from 'dayjs';
-import { assertAdminPermission, getEnv } from '../config';
+import { assertAdminPermission, getConfig, getEnv } from '../config';
 
 export default createCommand('match_confirm', '[ 主辦方指令 ] 確認該頻道的BP流程') //
     .callback((ctx) => {
@@ -37,9 +37,11 @@ export default createCommand('match_confirm', '[ 主辦方指令 ] 確認該頻�
             env.logChannel.send({ embeds: [embed] });
         }
 
+        const { ResultSubmitLimit } = getConfig();
+
         return createLogString(
             `已確認 ${channel.name} 的BP流程`, //
             `請 ${roleMention(teams[0].id)} 與 ${roleMention(teams[1].id)} 於以下時間點前繳交作戰紀錄：`,
-            dayjs().add(1, 'day').format('YYYY/MM/DD HH:mm:ss')
+            ResultSubmitLimit ? dayjs().add(ResultSubmitLimit, 'day').format('YYYY/MM/DD HH:mm:ss') : undefined
         );
     });

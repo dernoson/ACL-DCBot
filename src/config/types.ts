@@ -9,6 +9,7 @@ export type Config = {
     BPTimePrepare: number;
     BPTimeLimit: number;
     BPTimeAlert: number;
+    ResultSubmitLimit: number;
     MatchFlow: MatchMode;
     ResponsePlugin: ResponsePluginKey;
 };

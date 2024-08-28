@@ -3,6 +3,7 @@ import { ConfigOption } from './types';
 import { BPTimePrepare } from './BPTimePrepare';
 import { BPTimeLimit } from './BPTimeLimit';
 import { BPTimeAlert } from './BPTimeAlert';
+import { ResultSubmitLimit } from './RecordSubmitLimit';
 import { MatchFlow } from './MatchFlow';
 import { ResponsePlugin } from './ResponsePlugin';
 
@@ -10,6 +11,7 @@ export const configOptions = createRestrictObj<Record<string, ConfigOption>>()({
     BPTimePrepare,
     BPTimeLimit,
     BPTimeAlert,
+    ResultSubmitLimit,
     MatchFlow,
     ResponsePlugin,
 });
