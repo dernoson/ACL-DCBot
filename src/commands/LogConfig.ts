@@ -1,5 +1,5 @@
 import { createCommand } from '../commandUtils';
-import { assertAdminPermission, getConfig } from '../config';
+import { assertAdminPermission, configOptionDescs, getConfig } from '../config';
 import { createLogString } from '../utils';
 
 export default createCommand('log_config', '[ 主辦方指令 ] 輸出機器人設定值') //
@@ -10,7 +10,10 @@ export default createCommand('log_config', '[ 主辦方指令 ] 輸出機器人�
 
         return {
             content: createLogString(
-                ...Object.entries(config).map(([key, value]) => `${key}: \`${value}\``) //
+                ...Object.entries(config).map(([key, value]) => {
+                    const desc = configOptionDescs[key] ?? key;
+                    return `${desc}: \`${value}\``;
+                })
             ),
             ephemeral: true,
         };

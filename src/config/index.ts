@@ -14,5 +14,10 @@ export const configOptions: Record<string, ConfigOption> = {
     // ResponsePlugin,
 };
 
+export const configOptionDescs = Object.entries(configOptions).reduce(
+    (prev, [value, name]) => ({ ...prev, [value]: name.desc }),
+    {} as Record<string, string>
+);
+
 export * from './functions';
 export * from './env';
