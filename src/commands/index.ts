@@ -10,6 +10,7 @@ import LogMatch from './LogMatch';
 import LogConfig from './LogConfig';
 import SetConfig from './SetConfig';
 import Select from './Select';
+import Echo from './Echo';
 
 const commands = [
     Select, //
@@ -22,6 +23,7 @@ const commands = [
     LogConfig,
     SetConfig,
     SetEnv,
+    Echo,
 ];
 
 export const commandDefs = commands.map((command) => command.getBuilder());
