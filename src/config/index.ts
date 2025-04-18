@@ -4,6 +4,7 @@ import { BPTimeLimit } from './BPTimeLimit';
 import { BPTimeAlert } from './BPTimeAlert';
 import { ResultSubmitLimit } from './RecordSubmitLimit';
 import { MatchFlow } from './MatchFlow';
+import { ResponsePlugin } from './ResponsePlugin';
 
 export const configOptions: Record<string, ConfigOption> = {
     BPTimePrepare,
@@ -11,7 +12,7 @@ export const configOptions: Record<string, ConfigOption> = {
     BPTimeAlert,
     ResultSubmitLimit,
     MatchFlow,
-    // ResponsePlugin,
+    ResponsePlugin,
 };
 
 export const configOptionDescs = Object.entries(configOptions).reduce(
