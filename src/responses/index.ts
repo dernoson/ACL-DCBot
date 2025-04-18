@@ -7,6 +7,7 @@ import { chongyue } from './chongyue';
 import { saileach } from './saileach';
 import { shadow } from './shadow';
 import { winsok } from './winsok';
+import { nhmmm } from './nhmmm';
 
 export const extraResponse = (message: Message<true>) => {
     const pluginKey = getConfigValue('ResponsePlugin');
@@ -37,6 +38,7 @@ export const responsePlugins: Record<string, MessageResponser> = {
     saileach,
     shadow,
     winsok,
+    nhmmm,
 };
 
 export const isResponsePluginKey = (value: any): value is ResponsePluginKey => {
